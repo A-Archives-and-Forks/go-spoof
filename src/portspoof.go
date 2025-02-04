@@ -6,6 +6,7 @@ import(
 
 
 func main(){
-	var config = config()
+	var config = config() //collect information for setup
+	startServer(config)
 	fmt.Println(*config.IP)
 }

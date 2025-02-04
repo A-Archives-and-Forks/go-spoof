@@ -1,15 +1,12 @@
 /*
 GO-SPOOF 
 
-Configuration.go processes command line arguments and collects information
-for defaults arguments that have not been explicitly defined by the user. 
+Server.go establishes the server and 
+handles connections. 
 
 TO-DO
-	- ADD DEFAULT IP (current interface)
-	- ADD DEFAULT PORT (4444)
-	- ADD DEFAULT FILE CONFIG PATH
-	- ADD DEFAULT SERVICE SIGNATURE FILE PATH
-	- NO DEFAULT LOGGING PATH IS NEEDED - OFF BY DEFAULT
+	- ADD THREADPOOL
+    - RESPOND WITH THE LIES 
 */
 package main
 
@@ -21,6 +18,7 @@ import (
  "sync"
  "syscall"
  "time"
+ "log"
 )
 
 type server struct {
@@ -75,8 +73,9 @@ func (s *server) handleConnections() {
 
 func (s *server) handleConnection(conn net.Conn) {
  defer conn.Close()
+ fmt.Println(conn.RemoteAddr().String())
 
- // Add logic for handling connections here
+ // ADD WORK HERE
  fmt.Fprintf(conn, "Welcome to my TCP server!\n")
  time.Sleep(5 * time.Second)
  fmt.Fprintf(conn, "Goodbye!\n")
@@ -107,9 +106,10 @@ func (s *server) Stop() {
  }
 }
 
-func startServer() {
+func startServer(config Config) {
  //need to pass the port we want to host the server on
- s, err := newServer(":8080")
+ log.Println("starting server at "+*config.IP+":"+*config.Port)
+ s, err := newServer(":"+*config.Port)
  if err != nil {
   fmt.Println(err)
   os.Exit(1)
