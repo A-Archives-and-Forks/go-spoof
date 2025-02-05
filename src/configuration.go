@@ -54,7 +54,8 @@ func config() Config{
 	configuration.Daemon 					= flag.String("D", "default", "run as daemon process")
 	configuration.Verbosity 				= flag.String("v", "default", "be verbose")
 	flag.Parse()
-	processSignatureFile(configuration)
+	configuration = processSignatureFile(configuration)
+	fmt.Println(configuration.PortSignatureMap)
 	return configuration
 }
 
@@ -104,8 +105,6 @@ func processSignatureFile(config Config) Config {
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)
 	}
-
-	fmt.Println(config.PortSignatureMap)
 
 	return config
 }

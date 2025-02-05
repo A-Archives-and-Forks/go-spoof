@@ -89,10 +89,8 @@ func (s *server) handleConnection(conn net.Conn, config Config) {
  }
 
  originalPort := uint16(addr.Multiaddr[2])<<8 + uint16(addr.Multiaddr[3])
- //signature := config.PortSignatureMap[originalPort]
- fmt.Println(originalPort)
-
- fmt.Println(addr)
+ signature := config.PortSignatureMap[int(originalPort)]
+ fmt.Println(signature)
 
  // ADD WORK HERE
  fmt.Fprintf(conn, "Welcome to my TCP server!\n")
