@@ -58,7 +58,7 @@ func (s *server) acceptConnections() {
  }
 }
 
-func (s *server) handleConnections() {
+func (s *server) handleConnections(config Config) {
  defer s.wg.Done()
 
  for {
@@ -66,13 +66,13 @@ func (s *server) handleConnections() {
   case <-s.shutdown:
    return
   case conn := <-s.connection:
-   go s.handleConnection(conn)
+   go s.handleConnection(conn, config)
   }
  }
 }
 
 //THIS IS WHERE THE ACTUAL SPOOFING HAPPENS >:)
-func (s *server) handleConnection(conn net.Conn) {
+func (s *server) handleConnection(conn net.Conn, config Config) {
  defer conn.Close()
 
  //get the original port (port before iptables redirect)
@@ -88,6 +88,9 @@ func (s *server) handleConnection(conn net.Conn) {
     fmt.Println("ERROR WITH SYSCALL: ", err)
  }
 
+ originalPort := uint16(addr.Multiaddr[2])<<8 + uint16(addr.Multiaddr[3])
+ //signature := config.PortSignatureMap[originalPort]
+ fmt.Println(originalPort)
 
  fmt.Println(addr)
 
@@ -97,10 +100,10 @@ func (s *server) handleConnection(conn net.Conn) {
  fmt.Fprintf(conn, "Goodbye!\n")
 }
 
-func (s *server) Start() {
+func (s *server) Start(config Config) {
  s.wg.Add(2)
  go s.acceptConnections()
- go s.handleConnections()
+ go s.handleConnections(config)
 }
 
 func (s *server) Stop() {
@@ -134,7 +137,7 @@ func startServer(config Config) {
   os.Exit(1)
  }
 
- s.Start()
+ s.Start(config)
 
  // Wait for a SIGINT or SIGTERM signal to gracefully shut down the server
  sigChan := make(chan os.Signal, 1)
@@ -145,3 +148,4 @@ func startServer(config Config) {
  s.Stop()
  fmt.Println("Server stopped.")
 }
+
