@@ -5,8 +5,6 @@ Configuration.go processes command line arguments and collects information
 for defaults arguments that have not been explicitly defined by the user. 
 
 TO-DO
-	- ADD DEFAULT IP (current interface)
-	- ADD DEFAULT PORT (4444)
 	- ADD DEFAULT FILE CONFIG PATH
 	- ADD DEFAULT SERVICE SIGNATURE FILE PATH
 	- NO DEFAULT LOGGING PATH IS NEEDED - OFF BY DEFAULT
@@ -20,6 +18,10 @@ import (
 	"net"
 	"log"
 	"os"
+	"bufio"
+	"fmt"
+	"math/rand"
+	"time"
 )
 
 type Config struct {
@@ -30,6 +32,7 @@ type Config struct {
     LoggingFilePath      *string
     Daemon               *string
     Verbosity            *string
+	PortSignatureMap     map[int]string
 }
 
 func config() Config{
@@ -45,12 +48,13 @@ func config() Config{
 
 	configuration.IP 					    = flag.String("i", addr, "ip : Bind to a particular IP address")
 	configuration.Port 					= flag.String("p", "4444", "port : bind to a particular PORT number")
-	configuration.ServiceSignaturePath 	= flag.String("s", "default", "file_path : portspoof service signature regex. file")
+	configuration.ServiceSignaturePath 	= flag.String("s", "/home/jboyd/projects/go-spoof/tools/portspoof_signatures", "file_path : portspoof service signature regex. file")
 	configuration.ConfigurationFilePath = flag.String("c", "default", "file_path : portspoof configuration file")
 	configuration.LoggingFilePath		= flag.String("l", "default", "file_path : log port scanning alerts to a file")
 	configuration.Daemon 					= flag.String("D", "default", "run as daemon process")
 	configuration.Verbosity 				= flag.String("v", "default", "be verbose")
 	flag.Parse()
+	processSignatureFile(configuration)
 	return configuration
 }
 
@@ -71,3 +75,38 @@ func getIP() string {
 	}
 	return "1"
 }
+
+//Processes the signature file and returns a map of port:signature
+func processSignatureFile(config Config) Config {
+
+	var signatureLines []string;
+	portSignatureMap := make(map[int]string)
+
+	file, err := os.Open(*config.ServiceSignaturePath)
+	if err != nil {
+		log.Fatal("Error on opening signatures file", err)
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	
+	for scanner.Scan() {
+		signatureLines = append(signatureLines, scanner.Text())
+	}
+
+	rand.Seed(time.Now().UnixNano())
+	for i:=0;i <= 100; i++ {
+		portSignatureMap[i] = signatureLines[rand.Intn(len(signatureLines))]
+	}
+	
+	config.PortSignatureMap = portSignatureMap
+
+	if err := scanner.Err(); err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(config.PortSignatureMap)
+
+	return config
+}
+

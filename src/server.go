@@ -71,9 +71,11 @@ func (s *server) handleConnections() {
  }
 }
 
+//THIS IS WHERE THE ACTUAL SPOOFING HAPPENS >:)
 func (s *server) handleConnection(conn net.Conn) {
  defer conn.Close()
- fmt.Println(conn.RemoteAddr().String())
+
+ //get the original port (port before iptables redirect)
  const SO_ORIGINAL_DST = 80;
  fmt.Println(conn.RemoteAddr().String())
  file, err := conn.(*net.TCPConn).File()
@@ -85,6 +87,7 @@ func (s *server) handleConnection(conn net.Conn) {
  if err != nil {
     fmt.Println("ERROR WITH SYSCALL: ", err)
  }
+
 
  fmt.Println(addr)
 
@@ -121,6 +124,9 @@ func (s *server) Stop() {
 
 func startServer(config Config) {
  //need to pass the port we want to host the server on
+
+
+
  log.Println("starting server at "+*config.IP+":"+*config.Port)
  s, err := newServer(":"+*config.Port)
  if err != nil {
