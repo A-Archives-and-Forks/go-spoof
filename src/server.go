@@ -74,18 +74,16 @@ func (s *server) handleConnections() {
 func (s *server) handleConnection(conn net.Conn) {
  defer conn.Close()
  fmt.Println(conn.RemoteAddr().String())
- var SO_ORIGINAL_DST int;
+ const SO_ORIGINAL_DST = 80;
  fmt.Println(conn.RemoteAddr().String())
  file, err := conn.(*net.TCPConn).File()
  if err != nil {
-    fmt.Println(err)
-    return
+    fmt.Println("ERROR WITH TCPConn", err)
  }
  defer file.Close()
  addr, err := syscall.GetsockoptIPv6Mreq(int(file.Fd()), syscall.IPPROTO_IP, SO_ORIGINAL_DST)
  if err != nil {
-    fmt.Println("Error with finding original port")
-    return
+    fmt.Println("ERROR WITH SYSCALL: ", err)
  }
 
  fmt.Println(addr)
