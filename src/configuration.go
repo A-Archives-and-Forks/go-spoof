@@ -19,9 +19,10 @@ import (
 	"log"
 	"os"
 	"bufio"
-	"fmt"
 	"math/rand"
 	"time"
+	"github.com/AnatolyRugalev/goregen"
+	"regexp/syntax"
 )
 
 type Config struct {
@@ -55,7 +56,6 @@ func config() Config{
 	configuration.Verbosity 				= flag.String("v", "default", "be verbose")
 	flag.Parse()
 	configuration = processSignatureFile(configuration)
-	fmt.Println(configuration.PortSignatureMap)
 	return configuration
 }
 
@@ -95,9 +95,17 @@ func processSignatureFile(config Config) Config {
 		signatureLines = append(signatureLines, scanner.Text())
 	}
 
+
+
 	rand.Seed(time.Now().UnixNano())
+	var signatureLine string
 	for i:=0;i <= 100; i++ {
-		portSignatureMap[i] = signatureLines[rand.Intn(len(signatureLines))]
+		signatureLine = signatureLines[rand.Intn(len(signatureLines))]
+
+		generator, _ := regen.NewGenerator(signatureLine, &regen.GeneratorArgs{Flags: syntax.PerlX,})
+		newSig := generator.Generate()
+
+		portSignatureMap[i] = newSig
 	}
 	
 	config.PortSignatureMap = portSignatureMap
