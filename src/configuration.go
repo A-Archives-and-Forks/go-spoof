@@ -23,6 +23,7 @@ import (
 	"time"
 	"github.com/AnatolyRugalev/goregen"
 	"regexp/syntax"
+	"fmt"
 )
 
 type Config struct {
@@ -102,12 +103,13 @@ func processSignatureFile(config Config) Config {
 	for i:=0;i <= 100; i++ {
 		signatureLine = signatureLines[rand.Intn(len(signatureLines))]
 
-		generator, _ := regen.NewGenerator(signatureLine, &regen.GeneratorArgs{Flags: syntax.PerlX,})
-		newSig := generator.Generate()
+		generator, _ := regen.NewGenerator(signatureLine, &regen.GeneratorArgs{Flags: syntax.PerlX, MaxUnboundedRepeatCount: 3})
+		output := generator.Generate()
 
-		portSignatureMap[i] = newSig
+		portSignatureMap[i] = output
 	}
 	
+	fmt.Println(portSignatureMap)
 	config.PortSignatureMap = portSignatureMap
 
 	if err := scanner.Err(); err != nil {
