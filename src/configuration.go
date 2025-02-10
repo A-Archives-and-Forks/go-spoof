@@ -24,6 +24,7 @@ import (
 	"github.com/AnatolyRugalev/goregen"
 	"regexp/syntax"
 	"fmt"
+	"encoding/hex"
 )
 
 type Config struct {
@@ -99,12 +100,18 @@ func processSignatureFile(config Config) Config {
 
 
 	rand.Seed(time.Now().UnixNano())
+	re := regexp.MustCompile(`\\x[0-9a-fA-F]{2}`)
+	re2 := regexp.MustCompile(`\0`)
 	var signatureLine string
 	for i:=0;i <= 100; i++ {
 		signatureLine = signatureLines[rand.Intn(len(signatureLines))]
 
 		generator, _ := regen.NewGenerator(signatureLine, &regen.GeneratorArgs{Flags: syntax.PerlX, MaxUnboundedRepeatCount: 3})
 		output := generator.Generate()
+		
+		//process hex values
+		output := re.ReplaceAllStringFunc(signatureLine, replaceHex)
+		output := re.ReplaceAllStringFunc(signatureLine, "\0")
 
 		portSignatureMap[i] = output
 	}
@@ -118,4 +125,16 @@ func processSignatureFile(config Config) Config {
 
 	return config
 }
+
+func replaceHex(match string) string {
+	hexValue := match[2:]
+	bytes, err := hex.DecodeString(hexValue)
+	if err != nil {
+		log.Println("Error decoding hex string: ", err)
+		return match
+	}
+
+	return string(bytes)
+}
+
 
