@@ -116,8 +116,6 @@ func processSignatureFile(config Config) Config {
 
 		portSignatureMap[i] = output
 	}
-	
-	fmt.Println(portSignatureMap)
 	config.PortSignatureMap = portSignatureMap
 
 	if err := scanner.Err(); err != nil {

@@ -77,7 +77,7 @@ func (s *server) handleConnection(conn net.Conn, config Config) {
 
  //get the original port (port before iptables redirect)
  const SO_ORIGINAL_DST = 80;
- fmt.Println(conn.RemoteAddr().String())
+ //fmt.Println(conn.RemoteAddr().String())
  file, err := conn.(*net.TCPConn).File()
  if err != nil {
     fmt.Println("ERROR WITH TCPConn", err)
