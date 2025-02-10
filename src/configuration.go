@@ -23,6 +23,7 @@ import (
 	"time"
 	"github.com/AnatolyRugalev/goregen"
 	"regexp/syntax"
+	"regexp"
 	"fmt"
 	"encoding/hex"
 )
@@ -101,7 +102,7 @@ func processSignatureFile(config Config) Config {
 
 	rand.Seed(time.Now().UnixNano())
 	re := regexp.MustCompile(`\\x[0-9a-fA-F]{2}`)
-	re2 := regexp.MustCompile(`\0`)
+	//re2 := regexp.MustCompile(`\0`)
 	var signatureLine string
 	for i:=0;i <= 100; i++ {
 		signatureLine = signatureLines[rand.Intn(len(signatureLines))]
@@ -110,8 +111,8 @@ func processSignatureFile(config Config) Config {
 		output := generator.Generate()
 		
 		//process hex values
-		output := re.ReplaceAllStringFunc(signatureLine, replaceHex)
-		output := re.ReplaceAllStringFunc(signatureLine, "\0")
+		output = re.ReplaceAllStringFunc(signatureLine, replaceHex)
+		//output = re2.ReplaceAllStringFunc(signatureLine, \0)
 
 		portSignatureMap[i] = output
 	}
