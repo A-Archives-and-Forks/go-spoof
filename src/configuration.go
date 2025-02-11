@@ -23,7 +23,6 @@ import (
 	"time"
 	"github.com/AnatolyRugalev/goregen"
 	"regexp/syntax"
-	"regexp"
 	"encoding/hex"
 )
 
@@ -100,14 +99,14 @@ func processSignatureFile(config Config) Config {
 
 
 	rand.Seed(time.Now().UnixNano())
-	re := regexp.MustCompile(`\\x[0-9a-fA-F]{2}`)
+	//re := regexp.MustCompile(`\\x[0-9a-fA-F]{2}`)
 	//re2 := regexp.MustCompile(`\0`)
 	var signatureLine string
 	for i:=0;i <= 100; i++ {
 		signatureLine = signatureLines[rand.Intn(len(signatureLines))]
 
 		generator, err := regen.NewGenerator(signatureLine, &regen.GeneratorArgs{Flags: syntax.PerlX, MaxUnboundedRepeatCount: 3})
-			if err != nil {
+		if err != nil {
 			log.Println("Critical Error", err)
 			os.Exit(1)
 		}
@@ -115,7 +114,7 @@ func processSignatureFile(config Config) Config {
 
 		
 		//process hex values
-		output = re.ReplaceAllStringFunc(signatureLine, replaceHex)
+		//output = re.ReplaceAllStringFunc(signatureLine, replaceHex)
 		//output = re2.ReplaceAllStringFunc(signatureLine, \0)
 
 		portSignatureMap[i] = output
@@ -125,6 +124,7 @@ func processSignatureFile(config Config) Config {
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)
 	}
+	log.Println(portSignatureMap)
 	return config
 }
 
