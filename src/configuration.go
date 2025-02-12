@@ -60,7 +60,7 @@ func config() Config{
 	//Command line flags (FLAG, DEFAULT, HELP)
 	configuration.IP 					    = flag.String("i", addr, "ip : Bind to a particular IP address")
 	configuration.Port 						= flag.String("p", "4444", "port : bind to a particular PORT number")
-	configuration.ServiceSignaturePath 		= flag.String("s", "../tools/test", "file_path : go-spoof service signature regex. file")
+	configuration.ServiceSignaturePath 		= flag.String("s", " ", "file_path : go-spoof service signature regex. file")
 	configuration.LoggingFilePath			= flag.String("l", " ", "file_path : log port scanning alerts to a file")
 	configuration.Daemon 					= flag.String("D", " ", "run as daemon process")
 	configuration.Verbosity 				= flag.String("v", " ", "be verbose")
@@ -71,7 +71,6 @@ func config() Config{
 	configuration.OnStart					= flag.String("oS", " ", "start go-spoof on boot")
 	configuration.Yaml						= flag.String("Y", " ", "load configuration from yaml file")
 	flag.Parse()
-	configuration = processArgs(configuration) //perform setup tasks specified by the user 
 	return configuration
 }
 
@@ -100,8 +99,8 @@ func processArgs(config Config) Config {
 
 	//figure out how to run as a daemon 
 
-	var minPort int; 
-	var maxPort int; 
+	minPort := 1; 
+    maxPort := 65535; 
 	var err error;
 	var intPortArray []int
 	isList := false
@@ -113,7 +112,6 @@ func processArgs(config Config) Config {
 
 		if !strings.Contains(ports, " ") { //no spaces allowed in input
 			if strings.Contains(ports, ",") {
-				log.Println("Comma deliminated list")
 				isList = true
 				portArray := strings.Split(ports, ",")
 
@@ -140,7 +138,6 @@ func processArgs(config Config) Config {
 
 
 			} else if strings.Contains(ports, "-") {
-				log.Println("Range")
 				portRange := strings.Split(ports, "-")
 
 				maxPort, err = strconv.Atoi(portRange[1])
@@ -152,7 +149,6 @@ func processArgs(config Config) Config {
 				if err != nil {
 					log.Println("minPort cast to int error", err)
 				}
-				log.Println(maxPort, minPort)
 
 				//If user provides bad arguments (e.g. 1-100-200, 1-999999, 999-1)
 				if len(portRange) > 2 {
@@ -222,7 +218,6 @@ func processArgs(config Config) Config {
 			os.Exit(1)
 		}
 
-		log.Println(net.Interfaces())
 
 		cmd := exec.Command("iptables", "-t", "nat", "-A", "PREROUTING", "-p", "tcp", "-m", "tcp", "--dport", *config.TablesRange, "-j", "REDIRECT", "--to-ports", port) //should add argument for actual interface
 		_, err = cmd.Output()
@@ -239,7 +234,7 @@ func processArgs(config Config) Config {
 		_, err := cmd.Output()
 		if err != nil {
 			log.Println("Flush iptables failed", err)
-			log.Println("Are you running the -sT arg with root privs?")
+			log.Println("Are you running the -fT arg with root privs?")
 			os.Exit(1)
 		} else {
 			log.Println("Flushed successfully - exiting")
@@ -307,7 +302,6 @@ func processSignatureFile(config Config, minPort int, maxPort int, intPortArray 
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)
 	}
-	log.Println(portSignatureMap)
 	return config
 }
 
