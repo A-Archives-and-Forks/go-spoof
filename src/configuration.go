@@ -24,7 +24,6 @@ import (
 	"strings"
 	"strconv"
 	"github.com/AnatolyRugalev/goregen"
-	"github.com/sevlyar/go-daemon"
 	"regexp/syntax"
 	"encoding/hex"
 	"os/exec"
@@ -61,7 +60,7 @@ func config() Config{
 	//Command line flags (FLAG, DEFAULT, HELP)
 	configuration.IP 					    = flag.String("i", addr, "ip : Bind to a particular IP address")
 	configuration.Port 						= flag.String("p", "4444", "port : bind to a particular PORT number")
-	configuration.ServiceSignaturePath 		= flag.String("s", " ", "file_path : go-spoof service signature regex. file")
+	configuration.ServiceSignaturePath 		= flag.String("s", "../tools/test", "file_path : go-spoof service signature regex. file")
 	configuration.LoggingFilePath			= flag.String("l", " ", "file_path : log port scanning alerts to a file")
 	configuration.Daemon 					= flag.String("D", " ", "run as daemon process")
 	configuration.Verbosity 				= flag.String("v", " ", "be verbose")
@@ -108,32 +107,7 @@ func processArgs(config Config) Config {
 	isList := false
 
 
-	if *config.Daemon != " " {
-		log.Println("Daemon")
 
-		cntxt := &daemon.Context{
-			PidFileName: "sample.pid",
-			PidFilePerm: 0644,
-			LogFileName: "sample.log",
-			LogFilePerm: 0640,
-			WorkDir: "./", 
-			Umask: 027,
-			Args: []string{"[go-spoof example]"},
-		}
-
-		daemon, err := cntxt.Reborn()
-		if err != nil {
-			log.Fatal("RIP")
-		}
-		if daemon != nil {
-			os.Exit(1)
-		}
-
-		defer cntxt.Release()
-
-		log.Println("- - - - - - - - - - -")
-		log.Println("Daemon Started")
-	} 
 	if *config.SpoofPorts != "1-65535" {
 		ports := *config.SpoofPorts
 
