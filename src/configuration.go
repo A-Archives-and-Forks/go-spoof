@@ -227,6 +227,7 @@ func processArgs(config Config) Config {
 			os.Exit(1)
 		} else {
 			log.Println("iptables command routing traffic to port ", port)
+			os.Exit(0)
 		}
 	} 
 	if *config.FlushTables == "Y" || *config.FlushTables == "y" {
