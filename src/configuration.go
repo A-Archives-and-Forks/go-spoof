@@ -24,6 +24,7 @@ import (
 	"strings"
 	"strconv"
 	"github.com/AnatolyRugalev/goregen"
+	"github.com/sevlyar/go-daemon"
 	"regexp/syntax"
 	"encoding/hex"
 	"os/exec"
@@ -105,11 +106,33 @@ func processArgs(config Config) Config {
 	var err error;
 	var intPortArray []int
 	isList := false
-	
+
 
 	if *config.Daemon != " " {
 		log.Println("Daemon")
-		os.Exit(0)
+
+		cntxt := &daemon.Context{
+			PidFileName: "sample.pid",
+			PidFilePerm: 0644,
+			LogFileName: "sample.log",
+			LogFilePerm: 0640,
+			WorkDir: "./", 
+			Umask: 027,
+			Args: []string{"[go-spoof example]"},
+		}
+
+		daemon, err := cntxt.Reborn()
+		if err != nil {
+			log.Fatal("RIP")
+		}
+		if d != nil {
+			return
+		}
+
+		defer cntxt.Release()
+
+		log.Println("- - - - - - - - - - -")
+		log.Println("Daemon Started")
 	} 
 	if *config.SpoofPorts != "1-65535" {
 		ports := *config.SpoofPorts

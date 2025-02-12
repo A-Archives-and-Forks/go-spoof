@@ -3,10 +3,6 @@ GO-SPOOF
 
 Server.go establishes the server and 
 handles connections. 
-
-TO-DO
-	- ADD THREADPOOL
-    - RESPOND WITH THE LIES 
 */
 package main
 
