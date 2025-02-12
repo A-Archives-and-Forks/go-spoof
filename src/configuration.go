@@ -39,6 +39,7 @@ type Config struct {
     Verbosity            *string
 	SpoofPorts			 *string
 	StartTables			 *string
+	TablesRange			 *string
 	FlushTables			 *string
 	OnStart				 *string
 	Yaml				 *string
@@ -63,8 +64,9 @@ func config() Config{
 	configuration.LoggingFilePath			= flag.String("l", " ", "file_path : log port scanning alerts to a file")
 	configuration.Daemon 					= flag.String("D", " ", "run as daemon process")
 	configuration.Verbosity 				= flag.String("v", " ", "be verbose")
-	configuration.SpoofPorts                = flag.String("sP", "1-65535", "Provide a range of ports (1-10) or a list of ports 1,9,32. Default is all ports")
-	configuration.StartTables				= flag.String("sT", " ", "setup iptables to route traffic to binded port")
+	configuration.SpoofPorts                = flag.String("sP", "1-65535", "Provide a range of ports (1-10) or a list of ports 1,9,32, or a single port")
+	configuration.StartTables				= flag.String("sT", " ", "setup iptables to bind to a single port (bind to this port using -p). Specify specific range of ports to redirect FROM with -r")
+		configuration.TablesRange 				= flag.String("r", "1:65535", "port range for iptables to redirect from. Format is (low port):(high port) Must be used with -sT arg")
 	configuration.FlushTables				= flag.String("fT", " ", "reset iptables")
 	configuration.OnStart					= flag.String("oS", " ", "start go-spoof on boot")
 	configuration.Yaml						= flag.String("Y", " ", "load configuration from yaml file")
@@ -160,8 +162,8 @@ func processArgs(config Config) Config {
 					log.Println("Invalid range. Include only TWO numbers: LOW-HIGH")
 					os.Exit(1)
 				}
-				if maxPort > 65535 {
-					log.Println("Upper range too high! There are only 65535 Ports!")
+				if maxPort > 65535 || maxPort < 0 || minPort > 65535 || minPort < 0 {
+					log.Println("Invalid port number in -sP - port range must be between 0 and 65535")
 					os.Exit(1)
 				}
 				if minPort > maxPort {
@@ -178,10 +180,39 @@ func processArgs(config Config) Config {
 			os.Exit(0)
 		}
 	} 
-
 	if *config.StartTables != " " {
-		log.Println("Start IPTABLES on user provided port")
 		//two versions of port - one casted to an integer for sanitization - another kept as a string for exec.Command()
+
+		if *config.TablesRange != "1:65535" { //if custom range specified with -r, sanitize - exit if goofy input
+			iptablesRange := *config.TablesRange
+			var rangeArray []string
+			if strings.Contains(iptablesRange, ":") {
+				rangeArray = strings.Split(iptablesRange, ":")
+			} else {
+				log.Println("Format for -r - <LOW PORT>:<HIGH PORT> - invalid input")
+				os.Exit(1)
+			}
+
+			upperRange, err := strconv.Atoi(rangeArray[1])
+			if err != nil {
+				log.Println("Error in string to int conversion ", err)
+				os.Exit(1)
+			}
+			lowerRange, err := strconv.Atoi(rangeArray[0])
+			if err != nil {
+				log.Println("Error in string to int conversion", err)
+				os.Exit(1)
+			}
+
+			if upperRange < lowerRange {
+				log.Println("Upper range must be greater than or equal to lower range")
+				os.Exit(1)
+			}
+			if upperRange > 65535 || upperRange < 0 || lowerRange > 65535 || lowerRange < 0 {
+				log.Println("Invalid port number in -r - port range must be between 0 and 65535")
+			}
+		}
+		
 		intPort, err := strconv.Atoi(*config.StartTables) 
 		if err != nil {
 			log.Println("Error in converting port string input to int.", err)
@@ -189,32 +220,32 @@ func processArgs(config Config) Config {
 		}
 		port := *config.StartTables
 
-		if intPort > 65535 || intPort < 0 {
-			log.Println("Invalid port number - port must be between 0 and 65535")
+		if intPort > 65535 || intPort < 0  {
+			log.Println("Invalid port number in -sT - port must be between 0 and 65535")
 			os.Exit(1)
 		}
 
 		log.Println(net.Interfaces())
 
-		cmd := exec.Command("iptables", "-t", "nat", "-A", "PREROUTING", "-p", "tcp", "-m", "tcp", "--dport", "1:65535", "-j", "REDIRECT", "--to-ports", port) //should add argument for actual interface
-		stdout, err := cmd.Output()
+		cmd := exec.Command("iptables", "-t", "nat", "-A", "PREROUTING", "-p", "tcp", "-m", "tcp", "--dport", *config.TablesRange, "-j", "REDIRECT", "--to-ports", port) //should add argument for actual interface
+		_, err = cmd.Output()
 		if err != nil {
 			log.Println("iptables command failed", err)
+			log.Println("Note: -sT arg requires ROOT privs!")
 			os.Exit(1)
 		} else {
-			log.Println(stdout)
+			log.Println("iptables command routing traffic to port ", port)
 		}
 	} 
 	if *config.FlushTables == "Y" || *config.FlushTables == "y" {
-		log.Println("Flush IPTABLES on user provided port")
-
 		cmd := exec.Command("iptables", "-t", "nat", "-F")
-		stdout, err := cmd.Output()
+		_, err := cmd.Output()
 		if err != nil {
 			log.Println("Flush iptables failed", err)
+			log.Println("Are you running the -sT arg with root privs?")
 			os.Exit(1)
 		} else {
-			log.Println(stdout)
+			log.Println("Flushed successfully - exiting")
 		}
 		os.Exit(0)
 	} 
