@@ -196,7 +196,7 @@ func processArgs(config Config) Config {
 
 		log.Println(net.Interfaces())
 
-		cmd := exec.Command("iptables", "-t", "nat", "-A", "PREROUTING", "-i", "eth0", "-p", "tcp", "-m", "tcp", "--dport", "1:65535", "-j", "REDIRECT", "--to-ports", port)
+		cmd := exec.Command("iptables", "-t", "nat", "-A", "PREROUTING", "-p", "tcp", "-m", "tcp", "--dport", "1:65535", "-j", "REDIRECT", "--to-ports", port) //should add argument for actual interface
 		stdout, err := cmd.Output()
 		if err != nil {
 			log.Println("iptables command failed", err)
@@ -209,7 +209,13 @@ func processArgs(config Config) Config {
 		log.Println("Flush IPTABLES on user provided port")
 
 		cmd := exec.Command("iptables", "-t", "nat", "-F")
-
+		stdout, err := cmd.Output()
+		if err != nil {
+			log.Println("Flush iptables failed", err)
+			os.Exit(1)
+		} else {
+			log.Println(stdout)
+		}
 		os.Exit(0)
 	} 
 	if *config.OnStart == "Y" {
@@ -219,7 +225,6 @@ func processArgs(config Config) Config {
 
 	config = processSignatureFile(config, minPort, maxPort, intPortArray, isList) //read signatures from configuration file
 	return config
-
 }
 
 //Processes the signature file and returns a map of port:signature
