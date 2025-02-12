@@ -125,8 +125,8 @@ func processArgs(config Config) Config {
 		if err != nil {
 			log.Fatal("RIP")
 		}
-		if d != nil {
-			return
+		if daemon != nil {
+			os.Exit(1)
 		}
 
 		defer cntxt.Release()
