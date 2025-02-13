@@ -99,7 +99,7 @@ func (s *server) handleConnection(conn net.Conn, config Config) {
  if *config.LoggingFilePath != " " {
    logFilePath := *config.LoggingFilePath
 
-   originalPortStr, _ := strconv.Atoi(int(originalPort))
+   originalPortStr := strconv.Itoa(int(originalPort))
    writeData := conn.RemoteAddr().String() + ":" + originalPortStr + "\n"
 
    file, err = os.OpenFile(logFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
