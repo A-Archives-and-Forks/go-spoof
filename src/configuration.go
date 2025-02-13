@@ -242,10 +242,11 @@ func processArgs(config Config) Config {
 		}
 		os.Exit(0)
 	} 
-	if *config.OnStart == "Y" {
+	if *config.OnStart == "Y" || *config.OnStart == "y" {
 		log.Println("Start go-spoof on boot")
 		os.Exit(0)
 	} 
+
 
 	config = processSignatureFile(config, minPort, maxPort, intPortArray, isList) //read signatures from configuration file
 	return config

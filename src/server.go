@@ -113,6 +113,7 @@ func (s *server) handleConnection(conn net.Conn, config Config) {
    _, err = file.Write([]byte(writeData))
    if err != nil {
       log.Println("Error writing to log!")
+      file.Close()
    } else {
       file.Close()
    }
