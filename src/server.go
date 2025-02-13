@@ -91,6 +91,7 @@ func (s *server) handleConnection(conn net.Conn, config Config) {
  _, err = conn.Write([]byte(signature))
  if err != nil {
    log.Println("Error during response", err)
+   return
  } 
  fmt.Println(int(originalPort))
 
