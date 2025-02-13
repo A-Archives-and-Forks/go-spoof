@@ -87,18 +87,17 @@ func (s *server) handleConnection(conn net.Conn, config Config) {
  originalPort := uint16(addr.Multiaddr[2])<<8 + uint16(addr.Multiaddr[3])
  signature := config.PortSignatureMap[int(originalPort)]
  
-
  _, err = conn.Write([]byte(signature))
  if err != nil {
    log.Println("Error during response", err)
- } else {
-   log.Println("HAHA")
- }
+ } 
+ fmt.Println(int(originalPort))
+
  
  //log the connection if logging is enabled
  if *config.LoggingFilePath != " " {
    logFilePath := *config.LoggingFilePath
-   writeData := conn.RemoteAddr().String() + ":" + string(int(originalPort))
+   writeData := conn.RemoteAddr().String() + ":" + string(int(originalPort)) + "\n"
 
    file, err = os.OpenFile(logFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
    if err != nil {
