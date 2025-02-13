@@ -15,6 +15,7 @@ import (
  "syscall"
  "time"
  "log"
+ "strconv"
 )
 
 type server struct {
@@ -97,7 +98,9 @@ func (s *server) handleConnection(conn net.Conn, config Config) {
  //log the connection if logging is enabled
  if *config.LoggingFilePath != " " {
    logFilePath := *config.LoggingFilePath
-   writeData := conn.RemoteAddr().String() + ":" + string(int(originalPort)) + "\n"
+
+   originalPortStr, _ := strconv.Atoi(int(originalPort))
+   writeData := conn.RemoteAddr().String() + ":" + originalPortStr + "\n"
 
    file, err = os.OpenFile(logFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
    if err != nil {
