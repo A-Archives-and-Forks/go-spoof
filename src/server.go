@@ -71,7 +71,7 @@ func (s *server) handleConnections(config Config) {
 func (s *server) handleConnection(conn net.Conn, config Config) {
  defer conn.Close()
 
- //get the original port (port before iptables redirect)
+ //init SO_ORIGINAL_DST, doesn't matter what goes in here (port before iptables redirect)
  const SO_ORIGINAL_DST = 80;
  //fmt.Println(conn.RemoteAddr().String())
  file, err := conn.(*net.TCPConn).File()
@@ -93,7 +93,25 @@ func (s *server) handleConnection(conn net.Conn, config Config) {
    log.Println("Error during response", err)
    return
  }
+ 
+ //log the connection if logging is enabled
+ if *config.LoggingFilePath != " " {
+   logFilePath := *config.LoggingFilePath
+   writeData := conn.RemoteAddr().String() + ":" + string(originalPort)
 
+   file, err := os.Create(logFilePath)
+   if err != nil {
+      log.Println("Error on log write, closing write pointer. ", err)
+      if err := file.Close(); err != nil {
+         log.Fatal("Error on close, killing program. ", err)
+      }
+   }
+
+   _, err = file.Write([]byte(writeData))
+   if err != nil {
+      log.Println("Error writing to log!")
+   }
+ }
 
  // ADD WORK HERE
  fmt.Fprintf(conn, "Welcome to my TCP server!\n")
