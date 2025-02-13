@@ -89,6 +89,7 @@ func (s *server) handleConnection(conn net.Conn, config Config) {
  signature := config.PortSignatureMap[int(originalPort)]
  
  _, err = conn.Write([]byte(signature))
+ time.Sleep(time.Second * 5)
  if err != nil {
    log.Println("Error during response", err)
    return
