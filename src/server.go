@@ -93,7 +93,6 @@ func (s *server) handleConnection(conn net.Conn, config Config) {
    log.Println("Error during response", err)
    return
  } 
- fmt.Println(int(originalPort))
 
  
  //log the connection if logging is enabled
