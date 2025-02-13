@@ -98,7 +98,7 @@ func (s *server) handleConnection(conn net.Conn, config Config) {
  //log the connection if logging is enabled
  if *config.LoggingFilePath != " " {
    logFilePath := *config.LoggingFilePath
-   writeData := conn.RemoteAddr().String() + ":" + string(originalPort)
+   writeData := conn.RemoteAddr().String() + ":" + string(int(originalPort))
 
    file, err = os.OpenFile(logFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
    if err != nil {
@@ -115,11 +115,6 @@ func (s *server) handleConnection(conn net.Conn, config Config) {
       file.Close()
    }
  }
-
- // ADD WORK HERE
- fmt.Fprintf(conn, "Welcome to my TCP server!\n")
- time.Sleep(5 * time.Second)
- fmt.Fprintf(conn, "Goodbye!\n")
 }
 
 func (s *server) Start(config Config) {
