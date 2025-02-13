@@ -99,7 +99,7 @@ func (s *server) handleConnection(conn net.Conn, config Config) {
    logFilePath := *config.LoggingFilePath
    writeData := conn.RemoteAddr().String() + ":" + string(originalPort)
 
-   file, err := os.Create(logFilePath)
+   file, err = os.OpenFile(logFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
    if err != nil {
       log.Println("Error on log write, closing write pointer. ", err)
       if err := file.Close(); err != nil {
@@ -110,6 +110,8 @@ func (s *server) handleConnection(conn net.Conn, config Config) {
    _, err = file.Write([]byte(writeData))
    if err != nil {
       log.Println("Error writing to log!")
+   } else {
+      file.Close()
    }
  }
 
