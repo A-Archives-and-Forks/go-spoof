@@ -91,7 +91,8 @@ func (s *server) handleConnection(conn net.Conn, config Config) {
  _, err = conn.Write([]byte(signature))
  if err != nil {
    log.Println("Error during response", err)
-   return
+ } else {
+   log.Println("HAHA")
  }
  
  //log the connection if logging is enabled
