@@ -88,9 +88,12 @@ func (s *server) handleConnection(conn net.Conn, config Config) {
 
  originalPort := uint16(addr.Multiaddr[2])<<8 + uint16(addr.Multiaddr[3])
  signature := config.PortSignatureMap[int(originalPort)]
+
+ seconds, _ := strconv.Atoi(*config.SleepOpt)
+ time.Sleep(time.Second * time.Duration(seconds))
  
  _, err = conn.Write([]byte(signature))
- time.Sleep(time.Second * 5)
+
  if err != nil && !strings.Contains(err.Error(), "connection reset by peer") { //A standard nmap scan does not close TCP connections resulting in RST packets - ignore any error where in a RST packet is sent. 
    log.Println("Error during response", err)
    return

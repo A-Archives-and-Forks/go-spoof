@@ -43,6 +43,7 @@ type Config struct {
 	FlushTables			 *string
 	OnStart				 *string
 	Yaml				 *string
+	SleepOpt			 *string
 	PortSignatureMap     map[int]string
 }
 
@@ -70,6 +71,7 @@ func config() Config{
 	configuration.FlushTables				= flag.String("fT", " ", "reset iptables")
 	configuration.OnStart					= flag.String("oS", " ", "start go-spoof on boot")
 	configuration.Yaml						= flag.String("Y", " ", "load configuration from yaml file")
+	configuration.SleepOpt					= flag.String("w", "0", "provide a number of seconds to slow down service scan per port")
 	flag.Parse()
 	return configuration
 }
@@ -246,6 +248,12 @@ func processArgs(config Config) Config {
 		log.Println("Start go-spoof on boot")
 		os.Exit(0)
 	} 
+	if *config.SleepOpt != "0" {
+		_, err := strconv.Atoi(*config.SleepOpt)
+		if err != nil {
+			log.Fatal("Invalid option for -w. Please input a number")
+		}
+	}
 
 
 	config = processSignatureFile(config, minPort, maxPort, intPortArray, isList) //read signatures from configuration file
