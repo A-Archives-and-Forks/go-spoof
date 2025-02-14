@@ -16,6 +16,7 @@ import (
  "time"
  "log"
  "strconv"
+ "strings"
 )
 
 type server struct {
@@ -68,11 +69,11 @@ func (s *server) handleConnections(config Config) {
  }
 }
 
-//THIS IS WHERE THE ACTUAL SPOOFING HAPPENS >:)
+//THIS IS WHERE WE LIE TO THE ATTACKER >:)
 func (s *server) handleConnection(conn net.Conn, config Config) {
  defer conn.Close()
 
- //init SO_ORIGINAL_DST, doesn't matter what goes in here (port before iptables redirect)
+ //init SO_ORIGINAL_DST, doesn't matter what goes in here, just need something for the GetsocketIPv6Mreq function below
  const SO_ORIGINAL_DST = 80;
  //fmt.Println(conn.RemoteAddr().String())
  file, err := conn.(*net.TCPConn).File()
@@ -90,7 +91,7 @@ func (s *server) handleConnection(conn net.Conn, config Config) {
  
  _, err = conn.Write([]byte(signature))
  time.Sleep(time.Second * 5)
- if err != nil {
+ if err != nil && !strings.Contains(err.Error(), "connection reset by peer") { //A standard nmap scan does not close TCP connections resulting in RST packets - ignore any error where in a RST packet is sent. 
    log.Println("Error during response", err)
    return
  } 
