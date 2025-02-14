@@ -10,7 +10,7 @@ Adabas D Remote Control Server Version ([\d.]+) Date [\d-]+ \(key is [0-9a-f]+\)
 <cross-domain-policy><allow-access-from domain='([^']*)' to-ports='([^']*)' /></cross-domain-policy>\0
 <cross-domain-policy><allow-access-from domain=\"([^\"]*)\" to-ports=\"([^\"]*)\"/></cross-domain-policy>
 \+Welcome to Ability FTP Server \(Admin\)\. \[20500\]\r\n
-<\0r\0e\0s\0p\0o\0n\0s\0e\0>\0C\0o\0n\0n\0e\0c\0t\0e\0d\0 \0t\0o\0 [\0\d.]*<\0/\0r\0e\0s\0p\0o\0n\0s\0e\0>\0
+<\0r\0e\0s\0p\0o\0n\0s\0e\0>\0C\0o\0n\0n\0e\0c\0t\0e\0d\0 \0t\0o\0 \0[\d.]*<\0/\0r\0e\0s\0p\0o\0n\0s\0e\0>\0
 220 ([-.\w]+) AMANDA index server \((\d[-.\w ]+)\) ready\.\r\n
 501 Could not read config file [^!\r\n]+!\r\n220 ([-.\w]+) AMANDA index server \(([-\w_.]+)\) ready\.\r\n
 ld\.so\.1: amandad: fatal: (libsunmath\.so\.1): open failed: No such file or directory\n
@@ -21,7 +21,7 @@ Set\(icons,M,6,forward,7,prev,8,stop,9,next,\*,question,0,pause,#,no\);Set\(font
 <aafMessage><aafInitRequest></aafInitRequest></aafMessage>
 \x01\xff\0\xff\x01\x1d\0\xfd\0\n\x03\x05A\+ API \(([\d.]+)\) - CCS \(([\d.]+)\)\0
 \0\x01\0\x08\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x01\0\0\0\x02
-\x80\x01\0\x80\0\x80\0\0\xe5az\xcb\0\0\0\0J...............\x02\0\x01\0\0<\x01,.......\0...\0\0\0\0\x01\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\xff\xff\xff\xff\x01\x04\0.\0\x80\x08
+\x80\x01\0\x80\0\x80\0\0\xe5az\xcb\0\0\0\0J\.\.\.\.\.\.\.\.\.\.\.\.\.\.\.\x02\0\x01\0\0<\x01,\.\.\.\.\.\.\.\0\.\.\.\0\0\0\0\x01\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\xff\xff\xff\xff\x01\x04\0.\0\x80\x08
 \0`\0\x04\0\0\0\x1810\x000\x000\x00852224\0\0\0\0\0\0\0\0\0\0\0
 \0`\0\x03\0\0\0\x1810\x000\x000\x00852224\0\0\0\0\0\0\0\0\0\0\0
 MCOP\0\0\0.\0\0\0\x01\0\0\0\x10aRts/MCOP-([\d.]+)\0\0\0\0
@@ -2386,7 +2386,6 @@ Check Point FireWall-1 Client Authentication Server running on [-.\w]+\r\n\r\xff
 \xff\xfb\x01\xff\xfd\x03\xff\xfd\x1f\xff\xfd\0\xff\xfb\0Microsoft \(R\) Windows (NT |)\(TM\) Version (\d[-.\w]+) \(Build (\d+)\)\r\nWelcome to Microsoft Telnet Service \r\nTelnet Server Build (\d[-.\w]+)\n\rlogin: 
 \xff\xfd%\xff\xfb\x01\xff\xfb\x03\xff\xfd'\xff\xfd\x1f\xff\xfd\0\xff\xfb\0
 \r\nNo more connections are allowed to telnet server\. Please try again later\.\0
-\xff\xfd\x18\xff\xfd \xff\xfd#\xff\xfd\
 \xff\xfd'\xff\xfd\x18$| p|IBM OS/400 telnetd| o|OS/400
 \xff\xfb\x03\xff\xfb\x01\x07HP JetDirect\r\nPassword is not set\r\n
 \xff\xfb\x03\xff\xfb\x01\x07HP JetDirect\r\n\r\nEnter username: 
@@ -3237,8 +3236,6 @@ XBMSP-1\.0 1\.0 xbmsd ([\w._-]+)\n
 \+\d+ <[\d.]+@[\d.]+> XMail ([\d.]+) \(Linux/Ix86\) CTRL Server; .*\r\n
 \+\d+ <[\d.]+@[\d.]+> XMail ([\d.]+) CTRL Server; .*\r\n
 TEMP0 +: +[\d.]+\nTEMP1 +: +[\d.]+\nTEMP2 +: +[\d.]+\nFAN0 +: +[\d.]+\nFAN1 +: +[\d.]+\nFAN2 +: +[\d.]+\n
-<\?xml version=\"([^\"]+)\" encoding=\"([^\"]+)\"[^>]*(?<=\?)>
-<\?xml version=\"([^\"]+)\"[^>]*(?<=\?)>
 ([-\w_.]+) xine-ui ([\d.]+) remote server\. Nice to meet you\.\n
 \0\0\0\n\0\x03\0\0\0\0
 \r\nHello, this is zebra \(version (\d[-.\w]+)\)\.\r\nCopyright 1996-20
@@ -3256,7 +3253,7 @@ bp[-\w]+: error while loading shared libraries: libstdc\+\+-libc6\.2-2\.so\.3: c
 gethostbyaddr: [\w ]+\n
 bpjava-msvc: error while loading shared libraries: libpam\.so\.0: cannot open shared object file: No such file or directory\n
 220 PostCast SMTP server.*\r\n
-\0\0\0d\0\0\0\x18$| p/ISC (BIND
+\0\0\0d\0\0\0\x18$| p/ISC \(BIND\)
 \0\x0e@........\0\0\0\0\0\0\x0e@
 \0\x0e@........\0\0\0\0\0
 \0\*@.*\0\0\0\0\0
@@ -3289,7 +3286,6 @@ PPP on ([-\w_.]+)>
 \r\nlogin: \0
 \r\n[-\w_.]+ [\d.]+ - Unauthorized access \x07prohibited under penalty of law\.\r\n\r\nlogin: \xff\xfc\x01
 Microsoft Windows XP \[Version [\d.]+\]\n\(C\) Copyright 1985-\d+ Microsoft Corp\.\n\nC:\\>
-(?<=.)IOS\x20\(tm\)\x20([-\d\w.]+).{20,30}\x20Version\x20([-\d\w.()]+),\x20
 HELLO Welcome to Tunnel Vision \(([\d.]+)\)\n
 \x80\xf0\x80\x12\0\x01\0\0\0\0\0\0\x20CKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\0\0!\0\x01
 \x02\0\]\x02\0\0\0\0\0\0\x01\0.\0\0\0\x01\x0f\xff\x81\0\x97\0\0\0.\0\x04\0\0\0\x01\x01\+\d+x\d+\0\0\x01\|v([\d.]+)\0NI Master\0AMX Corp\.\0\x06\x0c\xc0\xa8\"D\x05'\0`\x9f....\x02\0U\x02\0\0\0\0\0\0\x01\0.\0\0\0\x01\x0f\xff\x82\0\x97\0\0\0.\0\x04\x01\0\0\x01\x01\+N/A             \x01zv([\d.]+)\0vxWorks Image\0AMX Corp\.\0\0\0.\x02\0O\x02\0\0\0\0\0\0\x01\0.\0\0\0\x01\x0f\xff\x83\0\x97\0\0\0.\0\x04\x02\0\0\x01\x01\+N/A             \x01{v([\d.]+)\0BootROM\0AMX Corp\.\0\0\0.\x02\0\^\x02\0\0\0\0\0\0\x01\0.\0\0\0\x01\x0f\xff\x84\0\x97\0\0\0.\0\x04\x03\0\0\x01\x01\x000000000000000000\x01\x0ev([\d.]+)\0AXLink I/F uController  \0AMX Corp\.\0\x03\0.
@@ -5572,7 +5568,7 @@ HTTP/1\.0 200 OK\r\n.*<TITLE>Network Camera</TITLE>.*<META HTTP-EQUIV=\"Refresh\
 HTTP/1\.1 302 Object Moved\r\nServer: NS_([\w._-]+)\r\nLocation: http://([\w._-]+)/wts\r\n
 HTTP/1\.0 200 OK\r\nServer: RapidLogic/([\w._-]+)\r\n.*<TITLE>ProLine</TITLE>.*setTimeout\( \"window\.location\.href = 'homeSumBS\.htm'\", 100 \) ;   // 0\.1 second delay\r\n</script>
 <HTML><HEAD><TITLE>Error</TITLE></HEAD><BODY><H1>Error</H1>Bad request or resource not found\.</BODY></HTML>\0
-)?contiki
+\)?contiki
 \"Wireless Router \(username: admin\)\"\r\n.*<body background
 HTTP/1\.1 200 OK\r\nCache-Control: no-cache\r\nConnection: close\r\nContent-Type: text/html\r\n.*<title>Canopy Home Page</title>\r\n.*<frame name=\"leftFrame\" noresize src=\"smleft\.html\">\r\n
 HTTP/1\.1 200 Ok\r\nServer: micro_httpd\r\n.*cfeVersion = '1\.0\.37-0\.7';\nif \(cfeVersion\.charAt\(9\) == '7'\)\n   document\.writeln\(\"<title>Tecom AH4222</title>\"\);\nelse\n   document\.writeln\(\"<title>Tecom AH4021</title>
@@ -7675,12 +7671,12 @@ How was your weekend\?;[0-9A-F]*\0
 \0\x06\x81\x04\0\0\0\0\0\0\0\0
 \x07version\x04bind\0\0\x10\0.\xc0\x0c\0\x10\0\x01\0\0\0\x05\0..Served by POWERDNS ([\d.]+) 
 \x07version\x04bind\0\0\x10\0.\xc0\x0c\0\x10\0\x01\0\0\0\x05\0..Served by PowerDNS - http://www\.powerdns\.com
-\0\x06\x81\x80\0\x01\0\x01\0\0\0\0\x07version\x04bind\0\0\x10\0\x03\xc0\x0c\0\x10\0\x03.......PowerDNS Recursor ([\w._-]+) (\$Id: pdns_recursor\.cc .*?\$)
-\0\x06\x81\x80\0\x01\0\x01\0\0\0\0\x07version\x04bind\0\0\x10\0\x03\xc0\x0c\0\x10\0\x03......PowerDNS Recursor ([\w._-]+) (\$Id: pdns_recursor\.cc .*?\$)
-\0\x06\x85[\x00\x80]\0\x01\0\x01\0\0\0\0\x07version\x04bind\0\0\x10\0\x03\xc0\x0c\0\x10\0\x03\0\0\0\x05\0..Served by POWERDNS ([\w._-]+) (\$Id: packethandler\.cc .*?\$)
-\0\x06\x81\x80\0\x01\0\x01\0\0\0\0\x07version\x04bind\0\0\x10\0\x03\xc0\x0c\0\x01\0\x01\0\0\0\x03\0\x04....
+\0\x06\x81\x80\0\x01\0\x01\0\0\0\0\x07version\x04bind\0\0\x10\0\x03\xc0\x0c\0\x10\0\x03.*PowerDNS Recursor ([\w._-]+) (\$Id: pdns_recursor\.cc .*?\$)
+\0\x06\x81\x80\0\x01\0\x01\0\0\0\0\x07version\x04bind\0\0\x10\0\x03\xc0\x0c\0\x10\0\x03.*PowerDNS Recursor ([\w._-]+) (\$Id: pdns_recursor\.cc .*?\$)
+\0\x06\x85\x00\x80\0\x01\0\x01\0\0\0\0\x07version\x04bind\0\0\x10\0\x03\xc0\x0c\0\x10\0\x03\0\0\0\x05\0..Served by POWERDNS ([\w._-]+) (\$Id: packethandler\.cc .*?\$)
+\0\x06\x81\x80\0\x01\0\x01\0\0\0\0\x07version\x04bind\0\0\x10\0\x03\xc0\x0c\0\x01\0\x01\0\0\0\x03\0\x04.*
 \0\x06\x05\0\0\x01\0\x01\0\0\0\0\x07version\x04bind\0\0\x10\0\x03\xc0\x0c\0\x10\0\x01X\x02\0\0\0..Microsoft DNS (.*)
-\0\x06\x81\x80\0\x01\0\x01\0\0\0\0\x07version\x04bind\0\0\x10\0\x03\xc0\x0c\0\x01\0\x01\0\0\0\x05\0\x04....
+\0\x06\x81\x80\0\x01\0\x01\0\0\0\0\x07version\x04bind\0\0\x10\0\x03\xc0\x0c\0\x01\0\x01\0\0\0\x05\0\x04.*
 \0\x06\x81\x83\0\x01\0\0\0\0\0\0\x07version\x04bind\0\0\x10\0\x03
 \0\x06\x84\x80\0\x01\0\x01\0\0\0\0\x07version\x04bind\0\0\x10\0\x01\xc0\x0c\0\x10\0\x01\0\0\0\0
 \0\x06\x81\x04\0\x01\0\0\0\0\0\0\x07version\x04bind\0\0\x10\0\x03
@@ -7692,7 +7688,7 @@ How was your weekend\?;[0-9A-F]*\0
 \0\x06\x85\x80\0\x01\0\x01\0\0\0\0\x07version\x04bind\0\0\x10\0\x03\x07VERSION\x04BIND\0\0\x10\0\x03\0\0\0\0\0\('Peticion no permitida/Query not allowed
 \0\x06\x81\x80\0\x01\0\x01\0\0\0\0\x07version\x04bind\0\0\x10\0\x03\xc0\x0c\0\x10\0\x03\0\x01Q\x80\0\x02\0\0
 \0\x06\x81\x85\0\x01\0\0\0\0\0\0\x07version\x04bind\0\0\x10\0\x03
-..\0\x08\0\x03[\0\r][\0\n]
+\.\.\0\x08\0\x03\0\r\0\n
 r\xfe\x1d\x13\0\0\0\x01\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x01
 \0\x06\x80\x85\0\0\0\0\0\0\0\0
 \0\x06\x81\x05\0\x01\0\0\0\0\0\0\x07version\x04bind\0\0\x10\0\x03
@@ -7705,23 +7701,23 @@ r\xfe\x1d\x13\0\0\0\x01\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x01
 \0\x06\x01\0\0\x02\0\0\0\0\0\0
 .[\x40\xc0].[\x20\x23\x32\x38].[\x40\xc0].[\x20\x23\x32\x38]
 \x07version\x04bind.*\x0cdnsmasq-([-\w._ ]+)
-....\x85\x80\0\x01\0\x01\0\0\0\0\x07version\x04bind\0\0\x10\0\x03\xc0\x0c\0\x10\0\x03\0\0\0\0...dnsmasq-([\w._-]+)
-..\0\x06\x81\x80\0\x01\0\x01\0\0\0\0\x07version\x04bind\0\0\x10\0\x03\xc0\x0c\0\x10\0\x03\0\0\0\0\0\x0e.unbound ([\w._-]+)
+\.\.\.\.\x85\x80\0\x01\0\x01\0\0\0\0\x07version\x04bind\0\0\x10\0\x03\xc0\x0c\0\x10\0\x03\0\0\0\0...dnsmasq-([\w._-]+)
+\.\.\0\x06\x81\x80\0\x01\0\x01\0\0\0\0\x07version\x04bind\0\0\x10\0\x03\xc0\x0c\0\x10\0\x03\0\0\0\0\0\x0e.unbound ([\w._-]+)
 \x07version\x04bind.*[\x03-\x14]BIND ([-\w._]{3,20})
 \x07version\x04bind.*[\x03-\x14]NSD ([-\w._]{3,20})
 \x07version\x04bind.*[\x03-\x14]([-\w._ ]{3,20})
 \x07version\x04bind\0\0\x10\0\x03\xc0\x0c\0\x10\0\x03\0\0\0\0\0\x01\0
-..\0\x06\x85\0\0\x01\0\x01\0\x01\0\0\x07version\x04bind\0\0\x10\0\x03\xc0\x0c\0\x10\0\x03\0\0\0\0...[\w._-]+-RedHat-([\w._-]+\.el5_[\w._-]+)\xc0\x0c\0\x02\0\x03\0\0\0\0\0\x02\xc0\x0c
+\.\.\0\x06\x85\0\0\x01\0\x01\0\x01\0\0\x07version\x04bind\0\0\x10\0\x03\xc0\x0c\0\x10\0\x03\0\0\0\0...[\w._-]+-RedHat-([\w._-]+\.el5_[\w._-]+)\xc0\x0c\0\x02\0\x03\0\0\0\0\0\x02\xc0\x0c
 \x07version\x04bind\0\0\x10\0\x03\x07VERSION\x04BIND\0\0\x10\0\x03\0\0\0\0\0\)\(Meta IP DNS - BIND V([\d.]+)-REL \(Build (\d+)\)
 \x07version\x04bind\0\0\x10\0\x03\x07VERSION\x04BIND\0\0\x10\0\x03\0\0\0\0\0
 \0\x1e\0\x06\x81\x84\0\x01\0\0\0\0\0\0\x07version\x04bind\0\0\x10\0\x03
 \0\x1e\0\x06\x81\x04\0\x01\0\0\0\0\0\0\x07version\x04bind\0\0\x10\0\x03
 \x07version\x04bind\0.*Microsoft DNS ([-\w_.]+) \(
 \0\x1e\0\x06\x81.\0\x01\0\0\0\0\0\0\x07version\x04bind\0\0\x10\0\x03
-..\0\x06\x85\0\0\x01\0\x01\0\0\0\0\x07version\x04bind\0\0\x10\0.\xc0\x0c\0\x10\0\x01\0\0\0\x05\0..Served by POWERDNS (\d[-.\w]+) 
-..\0\x06\x85\0\0\x01\0\x01\0\0\0\0\x07version\x04bind\0\0\x10\0.\xc0\x0c\0\x10\0\x01\0\0\0\x05\0..Served by PowerDNS - http://www\.powerdns\.com
-..*\x07version\x04bind.*PowerDNS Recursor ([\d.]+)
-..*\x07version\x04bind.*Incognito DNS \w+ ([\d.]+) \(
+\.\.\0\x06\x85\0\0\x01\0\x01\0\0\0\0\x07version\x04bind\0\0\x10\0.\xc0\x0c\0\x10\0\x01\0\0\0\x05\0..Served by POWERDNS (\d[-.\w]+) 
+\.\.\0\x06\x85\0\0\x01\0\x01\0\0\0\0\x07version\x04bind\0\0\x10\0.\xc0\x0c\0\x10\0\x01\0\0\0\x05\0..Served by PowerDNS - http://www\.powerdns\.com
+\..*\x07version\x04bind.*PowerDNS Recursor ([\d.]+)
+\..*\x07version\x04bind.*Incognito DNS \w+ ([\d.]+) \(
 \0\x0c\0\x10\x81\x85\0\0\0\0\0\0\0\0
 \0\x1e\0\x06\x81\x85\0\x01\0\0\0\0\0\0\x07version\x04bind\0\0\x10\0\x03
 \0\x0c\0\x06\x81\x05\0\0\0\0\0\0\0\0
@@ -8411,7 +8407,7 @@ HTTP/1\.0 \d\d\d .*\r\nServer: Medusa/([\w.]+)\r\n.*<title>Asterisk/DeStar PBX :
 HTTP/1\.1 404 Can't find file\r\n$| p|Dynamode/Motorola WAP http config
 HTTP/1\.0 404 Not Found\r\n.*Server: lighttpd/([\d.]+)\r\n
 HTTP/1\.0 200 OK\r\nContent-Type: text/html\r\nContent-Length: 241\r\n\r\n<html><head><title>POPFile Web Server Error 404
-HTTP/1\.0 400 No any servlet found for serving /\r\ncontent-type: text/html\r\nconnection: keep-alive\r\ncontent-length: \d+\r\nmime-version: [\d.]+\r\n\r\n<HTML><HEAD><TITLE>400 No any servlet found for serving /</TITLE></HEAD><BODY BGCOLOR=\"#F1D0F2\"><H2>400 No any servlet found for serving /</H2><HR><ADDRESS><A HREF=\"http://tjws\.sourceforge\.net\">Rogatkin's JWS based on Acme\.Serve Version ([\w._-]+), \$Revision: ([\w._-]+) \
+HTTP\/\/1\.0 400 No any servlet found for serving \/\r\ncontent-type: text\/html\r\nconnection: keep-alive\r\ncontent-length: \d+\r\nmime-version: [\d.]+\r\n\r\n<HTML><HEAD><TITLE>400 No any servlet found for serving \/<\/TITLE><\/HEAD><BODY BGCOLOR=\"#F1D0F2\"><H2>400 No any servlet found for serving \/<\/H2><HR><ADDRESS><A HREF=\"http:\/\/tjws\.sourceforge\.net\">Rogatkin's JWS based on Acme\.Serve Version ([\w._-]+), \$Revision: ([\w._-]+)
 HTTP/1\.1 404 Not Found\r\nContent-Type: text/html\r\nConnection: close\r\n\r\n<html>\n  <head>\n    <title>Linksys PAP2 Configuration</title>\r\n
 HTTP/1\.1 200 OK.*\nServer: HPSMH\n.*\n<title>System Management Homepage</TITLE>
 HTTP/1\.0 499 Unauthorized user access\. Check User/Password/Scope\. \r\nContent-Length: \d+\r\nContent-Type: text/html\r\nConnection: close\r\n\r\n<HTML><TITLE>Access Denied</TITLE><H2>Navi Error\. Access Denied\.</H2><BODY><P>Please check the typed URL\.</P></BODY></HTML>| p|Dell/EMC CX300 Navisphere http config
@@ -8633,7 +8629,6 @@ Fictive printer queue short information\n
 \x03\0\0\x0e\t\xd0\0\0\0[\x02\xa1]\0\xc0\x01\n
 \x03\0\0\x0b\x06\xd0\0\x004\x12\0
 nmproxy: Procotol byte is not 8\n
-\x03.{899,1536}
 \0\x01\0\x08\0\0\x01\0
 .\0\x01.....\0([^\0]+)\0
 \0\0
@@ -8680,12 +8675,12 @@ DONE00000001.*CRITICAL! distcc seems to have invoked itself recursively!\n
 \x05..ServerName;([\w\-]+);InstanceName;[\w\-]+;IsClustered;\w{2,3};Version;([\d\.]+);tcp;(\d{1,5});;
 \x05..ServerName;([\w\-]+);InstanceName;[\w\-]+;IsClustered;\w{2,3};Version;([\d\.]+);;
 \xfa\xfe\0\x10\0\0\x01\0\0\0\0\0\0\0\0\0
-\x24[\x01-\x0f]..............................................
-\xe4[\0\x04]..............................................
-\x1c[\x01-\x0f]..............................................
-\xdc[\x00-\x0f]..............................................
-\x5c\x03..............................................
-\x64\x03..............................................
+\x24[\x01-\x0f]*..............................................
+\xe4[\x00-\x04]*..............................................
+\x1c[\x01-\x0f]*...............................................
+\xdc[\x00-\x0f]*..............................................
+\x5c\x03\..............................................
+\x64\x03\..............................................
 help\r\n\r\n\0\0\0\0\x20CKAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\0\0!\0\x01
 \0\0\x84\0\0\0\0\x05\0\0\0\0.Lexmark ([\x20-\x7f]+)\x0c_host-config\x04_udp\x05local\0
 \0\0\x84\0\0\0\0\x05\0\0\0\0\x15S300-S400 Series \(32\).+ET(\w{2})(\w{2})(\w{2})(\w{2})(\w{2})(\w{2})
@@ -8755,7 +8750,7 @@ HTTP/1\.0 400 Bad Request\r\nDate: .*\r\nServer: Boa/([\w._-]+)\r\nConnection: c
 [\d\D]{28}\s*(OpenAFS)\s+stable\s+([\d\.]+)\s+([^\0]+)\0
 [\d\D]{28}\s*(OpenAFS)([\d\.]{3}[^\s\0]*)\s+([^\0]+)\0
 [\d\D]{28}\s*(OpenAFS)([\d\.]{3}[^\s\0]*)\0
-[\d\D]{28}\s*Base\sconfiguration\safs([\d\.]+)\s+[^\s\0\;]+[\0\;]
+[\d\D]{28}\s*Base\sconfiguration\safs([\d\.]+)\s+[^\s\0\;]+\0[\;]
 [\d\D]{28}\s*arla-([\d\.]+)\0
 \x15\xfe\xff\0\0\0\0\0\0\0\0\0\x07\x02\x16\0\0\0\0\0
 \x04\x80\x03\xe7\0\x08\0D\0E\0U\0G\0K\0......
@@ -8847,7 +8842,6 @@ STAT pid (\d+)\r\nSTAT uptime (\d+)\r\n.*?STAT version ([\w_.-]+)\r\n.*?STAT cur
 \0\0\0\x03\0\0\0\x0a\0\0\0\x01
 \0\0\0\x03\0\0\0.\0\0\0.
 \0\0\0\0DB2DAS\x20\x20\x20\x20\x20\x20.{28}\x9b\0\0\0\x0c\0\0\0Z\0\0\0\x10\0\0\0\x0c\0\0\0L\0\0\0\0\0\0\0\$\0\0\0\x0c\0\0\0O\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x10\0\0\0\x0c\0\0\0L\0\0\0\0\0\0\0\x19\0\0\0\x0c\0\0\0\x04\0\0\x04\xb8SQL0(\d)(\d\d)(\d+)
-(?<=.)DB2/([^\0]+)\0\0\0\0\0\0\0\0.{1,4}\0\0\0\0\0\0\0SQL0(\d)(\d\d)(\d+)
 \0\xa9\x10..\x01\0\0SQLDB2RA\x01\0\x05\0.{10,13}SQLCA
 \0{255}
 \0Server string for PARC version 1 Wire Encryption version 1\0
@@ -8891,17 +8885,6 @@ ENAME.{1}(.+)JSON.{1}(\d+)VERS.{1}(.+)UUID.{1}(.+)
 \x01\x03\0\x01\0\0\0\0....\0\0\0\0........\x80\x7f.([^\0\x01]+)[\0\x01].*\x0aWindows NT\x03\x0eAFPVersion 2\.0\x0eAFPVersion 2\.1\x06AFP2\.2\x03\x10ClearTxt Passwrd\x0eMicrosoft V1\.0\x05MS2\.0
 \x01\x03\0\x01\0\0\0\0................\x03\xff.([^\0\x01]+)[\0\x01].*Windows Version: 5\.0 \(2\) build 2195 Service Pack (\d+) (\d+)-bit \(ExtremeZ-IP ([\w._-]+)x05\)\x03\x06AFP3\.2\x06AFP3\.1\x06AFP2\.2.*afpserver/([\w._@-]+)\0
 \x01\x03\0\x01\0\0\0\0................\x03\xff.([^\0\x01]+)[\0\x01].*Windows Version: 5\.1 \(2\) build 2600 Service Pack (\d+) (\d+)-bit \(ExtremeZ-IP ([\w._-]+)x10\)\x02\x06AFP2\.2\x06AFP3\.1.*afpserver/([\w._@-]+)\0
-\xff\xff\xff\xffprint\n.*\\version\\([^\\]* Linux)(?=\\).*\\gamename\\data1(?=\\)
-\xff\xff\xff\xffstatusResponse\n.*\\gamename\\Nexuiz(?=\\).*\\gameversion\\([^\\]*)(?=\\)
-\xff\xff\xff\xffstatusResponse\n.*\\version\\([^\\]* linux-[^\\]*)(?=\\).*\\gamename\\baseoa(?=\\)
-\xff\xff\xff\xffstatusResponse\n.*\\version\\([^\\]* freebsd-[^\\]*)(?=\\).*\\gamename\\baseoa(?=\\)
-\xff\xff\xff\xffstatusResponse\n.*\\version\\tremulous ([^\\]* linux-[^\\]*)(?=\\)
-\xff\xff\xff\xffstatusResponse\n.*\\version\\tremulous ([^\\]* freebsd-[^\\]*)(?=\\)
-\xff\xff\xff\xffstatusResponse\n.*\\version\\([^\\]* linux-[^\\]*)(?=\\).*\\gamename\\q3ut4(?=\\)
-\xff\xff\xff\xffstatusResponse\n.*\\version\\([^\\]* freebsd-[^\\]*)(?=\\).*\\gamename\\q3ut4(?=\\)
-\xff\xff\xff\xffstatusResponse\n.*\\version\\([^\\]* Linux)(?=\\).*\\gamename\\Warsow(?=\\)
-\xff\xff\xff\xffstatusResponse\n.*\\version\\([^\\]* linux-[^\\]*)(?=\\)
-\xff\xff\xff\xffstatusResponse\n.*\\version\\([^\\]* freebsd-[^\\]*)(?=\\)
 \xff\xff\xff\xffgetserversResponse
 serverstatus.*version%3A([\.\d]+) uuid%3A([-\w]+) info%20total%20albums%3A\d+ info%20total%20artists%3A\d+ info%20total%20genres%3A\d+ info%20total%20songs%3A(\d+) player%20count%3A\d+ sn%20player%20count%3A\d+ other%20player%20count%3A\d+\r\n
 \xbc\xa0\xb6
@@ -8958,6 +8941,5 @@ HTTP/1\.1 200 OK\r\nContent-Length: \d+\r\n\r\nCluster \[\d+\] {\n\tMember (.*?)
 ........\x00\x00\x02\x97\x76\x8b\x54\xad\x79\xe3\xaf\x87\xeb\xaa\x1a\x19\xba\xcf\x41\xe0\x16\xa2\x32\x6c\xf3\xcf\xf4\x8e\x3c\x44\x83\xc8\x8d\x51\x45\x6f\x90\x95\x23\x33\x08\x86\x2d\x40
 Content-Length: [0-9]+\n\n<\?xml version=\"1\.0\"\?>\s*<xmlsysd init=\"1\">\s*<system>\s*<identity>\s*<hostname>([^<]*)</hostname>\s*<hostip>([^<]*)</hostip>\s*</identity>\s*</system>\s*<proc>\s*<version>([^<]*)</version>\s*</proc>\s*</xmlsysd>
 \x00\x03\xf1\x26.{88}(.*)\0\0(?:.*?:){5}(.*)\0\0
-EYE1.(.*?)(?|\x02(\d)|\x03(\d{2})|\x04(\d{3})|\x05(\d{4})|\x06(\d{5}))/s p/All-Seeing Eye/ i/game: $1; port: $2
 GOTBACK
 andReceiver-\d+\.\d+\.\d+
