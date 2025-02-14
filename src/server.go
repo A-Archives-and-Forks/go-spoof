@@ -3,10 +3,6 @@ GO-SPOOF
 
 Server.go establishes the server and 
 handles connections. 
-
-TO-DO
-	- ADD THREADPOOL
-    - RESPOND WITH THE LIES 
 */
 package main
 
@@ -19,6 +15,8 @@ import (
  "syscall"
  "time"
  "log"
+ "strconv"
+ "strings"
 )
 
 type server struct {
@@ -58,7 +56,7 @@ func (s *server) acceptConnections() {
  }
 }
 
-func (s *server) handleConnections() {
+func (s *server) handleConnections(config Config) {
  defer s.wg.Done()
 
  for {
@@ -66,38 +64,59 @@ func (s *server) handleConnections() {
   case <-s.shutdown:
    return
   case conn := <-s.connection:
-   go s.handleConnection(conn)
+   go s.handleConnection(conn, config)
   }
  }
 }
 
-func (s *server) handleConnection(conn net.Conn) {
+//THIS IS WHERE WE LIE TO THE ATTACKER >:)
+func (s *server) handleConnection(conn net.Conn, config Config) {
  defer conn.Close()
- fmt.Println(conn.RemoteAddr().String())
- const SO_ORIGINAL_DST = 80;
- fmt.Println(conn.RemoteAddr().String())
- file, err := conn.(*net.TCPConn).File()
- if err != nil {
-    fmt.Println("ERROR WITH TCPConn", err)
- }
- defer file.Close()
- addr, err := syscall.GetsockoptIPv6Mreq(int(file.Fd()), syscall.IPPROTO_IP, SO_ORIGINAL_DST)
- if err != nil {
-    fmt.Println("ERROR WITH SYSCALL: ", err)
- }
 
- fmt.Println(addr)
+ //init SO_ORIGINAL_DST, doesn't matter what goes in here, just need something for the GetsocketIPv6Mreq function below
+ originalPort := getOriginalPort(conn)
+ signature := config.PortSignatureMap[int(originalPort)]
 
- // ADD WORK HERE
- fmt.Fprintf(conn, "Welcome to my TCP server!\n")
- time.Sleep(5 * time.Second)
- fmt.Fprintf(conn, "Goodbye!\n")
+ seconds, _ := strconv.Atoi(*config.SleepOpt)
+ time.Sleep(time.Second * time.Duration(seconds))
+ 
+ _, err := conn.Write([]byte(signature))
+
+ if err != nil && !strings.Contains(err.Error(), "connection reset by peer") { //A standard nmap scan does not close TCP connections resulting in RST packets - ignore any error where in a RST packet is sent. 
+   log.Println("Error during response", err)
+ } 
+
+ 
+ //log the connection if logging is enabled
+ if *config.LoggingFilePath != " " {
+   logFilePath := *config.LoggingFilePath
+
+   originalPortStr := strconv.Itoa(int(originalPort))
+   writeData := conn.RemoteAddr().String() + " -> " + originalPortStr + "\n"
+
+   file, err := os.OpenFile(logFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+   if err != nil {
+      log.Println("Error on log write, closing write pointer. ", err)
+      if err := file.Close(); err != nil {
+         log.Fatal("Error on close, killing program. ", err)
+      }
+   }
+
+   _, err = file.Write([]byte(writeData))
+   if err != nil {
+      log.Println("Error writing to log!")
+      file.Close()
+   } else {
+      file.Close()
+   }
+ }
 }
 
-func (s *server) Start() {
- s.wg.Add(2)
- go s.acceptConnections()
- go s.handleConnections()
+func (s *server) Start(config Config) {
+   
+      s.wg.Add(2)
+      go s.acceptConnections()
+      go s.handleConnections(config)
 }
 
 func (s *server) Stop() {
@@ -119,8 +138,27 @@ func (s *server) Stop() {
  }
 }
 
+func getOriginalPort(conn net.Conn) uint16 {
+   const SO_ORIGINAL_DST = 80;
+   file, err := conn.(*net.TCPConn).File()
+   if err != nil {
+      fmt.Println("ERROR WITH TCPConn", err)
+   }
+   defer file.Close()
+   addr, err := syscall.GetsockoptIPv6Mreq(int(file.Fd()), syscall.IPPROTO_IP, SO_ORIGINAL_DST)
+   if err != nil {
+      fmt.Println("ERROR WITH SYSCALL: ", err)
+   }
+  
+   originalPort := uint16(addr.Multiaddr[2])<<8 + uint16(addr.Multiaddr[3])
+   return originalPort
+}
+
 func startServer(config Config) {
  //need to pass the port we want to host the server on
+
+
+
  log.Println("starting server at "+*config.IP+":"+*config.Port)
  s, err := newServer(":"+*config.Port)
  if err != nil {
@@ -128,7 +166,7 @@ func startServer(config Config) {
   os.Exit(1)
  }
 
- s.Start()
+ s.Start(config)
 
  // Wait for a SIGINT or SIGTERM signal to gracefully shut down the server
  sigChan := make(chan os.Signal, 1)
@@ -139,3 +177,4 @@ func startServer(config Config) {
  s.Stop()
  fmt.Println("Server stopped.")
 }
+
