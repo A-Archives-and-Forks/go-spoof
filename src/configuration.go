@@ -27,6 +27,7 @@ import (
 	"regexp/syntax"
 	"encoding/hex"
 	"os/exec"
+	"sync"
 )
 
 type Config struct {
@@ -250,16 +251,67 @@ func processArgs(config Config) Config {
 		}
 	}
 
+	log.Println(maxPort)
+	if maxPort > 10000 {
+		chunkSize := 10000
+		//chunkChannel := make(chan map[int]string, (maxPort+chunkSize-1)/chunkSize) //map of maps
+		chunks := make([]map[int]string, (maxPort+chunkSize-1)/chunkSize) //map of maps
+		
 
-	config = processSignatureFile(config, minPort, maxPort, intPortArray, isList) //read signatures from configuration file
+		for i := range chunks {
+			chunks[i] = make(map[int]string) //assign a int to string map for each 10000 chunk
+		}
+
+		var wg sync.WaitGroup
+		var startIndex int;
+		var endIndex int; 
+
+		for i := range chunks {
+			wg.Add(1)
+
+			if i == 0 {
+				startIndex = 1 + i // 1
+				endIndex = chunkSize // 10000
+			} else {
+				startIndex = i * chunkSize //X0000
+				endIndex = startIndex + chunkSize //(X + C)0000 
+				startIndex = startIndex + 1 //(X0001)
+			}
+
+			if maxPort < endIndex {
+				endIndex = maxPort
+			}
+
+			go func(i int, config Config, startIndex int, endIndex int, intPortArray []int, isList bool) {
+				defer wg.Done()
+				signatureMap :=  processSignatureFile(config, startIndex, endIndex, intPortArray, isList)
+				chunks[i] = signatureMap
+
+			}(i, config, startIndex, endIndex, intPortArray, isList)
+		}
+		wg.Wait()
+		finalMap := make(map[int]string, maxPort)
+		for _, chunk := range chunks {
+			for k, v := range chunk {
+				finalMap[k] = v
+			}
+		}
+
+		config.PortSignatureMap = finalMap
+		return config
+	}
+
+
+
+	//config = processSignatureFile(config, minPort, maxPort, intPortArray, isList) //read signatures from configuration file
 	return config
 }
 
 //Processes the signature file and returns a map of port:signature
-func processSignatureFile(config Config, minPort int, maxPort int, intPortArray []int, isList bool) Config {
+func processSignatureFile(config Config, minPort int, maxPort int, intPortArray []int, isList bool) map[int]string {
 
 	var signatureLines []string;
-	portSignatureMap := make(map[int]string)
+	portSignatureMap := make(map[int]string, maxPort)
 
 	file, err := os.Open(*config.ServiceSignaturePath)
 	if err != nil {
@@ -278,8 +330,11 @@ func processSignatureFile(config Config, minPort int, maxPort int, intPortArray 
 	rand.Seed(time.Now().UnixNano())
 	var signatureLine string
 
-
+	log.Println("Assigning ports ", minPort, maxPort)
 	for i:=minPort;i <= maxPort; i++ {
+		if i == maxPort {
+			log.Println("DONE!")
+		}
 		signatureLine = signatureLines[rand.Intn(len(signatureLines))]
 		generator, err := regen.NewGenerator(signatureLine, &regen.GeneratorArgs{Flags: syntax.PerlX, MaxUnboundedRepeatCount: 3})
 		if err != nil {
@@ -293,12 +348,12 @@ func processSignatureFile(config Config, minPort int, maxPort int, intPortArray 
 			portSignatureMap[intPortArray[i]] = output
 		}
 	}
-	config.PortSignatureMap = portSignatureMap
+	//config.PortSignatureMap = portSignatureMap
 
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)
 	}
-	return config
+	return portSignatureMap
 }
 
 func replaceHex(match string) string {
