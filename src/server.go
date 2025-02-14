@@ -48,6 +48,10 @@ func (s *server) acceptConnections() {
    return
   default:
    conn, err := s.listener.Accept()
+   originalPort := getOriginalPort(conn)
+   if int(originalPort) == 2 {
+      return
+   }
    if err != nil {
     continue
    }
@@ -74,24 +78,13 @@ func (s *server) handleConnection(conn net.Conn, config Config) {
  defer conn.Close()
 
  //init SO_ORIGINAL_DST, doesn't matter what goes in here, just need something for the GetsocketIPv6Mreq function below
- const SO_ORIGINAL_DST = 80;
- file, err := conn.(*net.TCPConn).File()
- if err != nil {
-    fmt.Println("ERROR WITH TCPConn", err)
- }
- defer file.Close()
- addr, err := syscall.GetsockoptIPv6Mreq(int(file.Fd()), syscall.IPPROTO_IP, SO_ORIGINAL_DST)
- if err != nil {
-    fmt.Println("ERROR WITH SYSCALL: ", err)
- }
-
- originalPort := uint16(addr.Multiaddr[2])<<8 + uint16(addr.Multiaddr[3])
+ originalPort := getOriginalPort(conn)
  signature := config.PortSignatureMap[int(originalPort)]
 
  seconds, _ := strconv.Atoi(*config.SleepOpt)
  time.Sleep(time.Second * time.Duration(seconds))
  
- _, err = conn.Write([]byte(signature))
+ _, err := conn.Write([]byte(signature))
 
  if err != nil && !strings.Contains(err.Error(), "connection reset by peer") { //A standard nmap scan does not close TCP connections resulting in RST packets - ignore any error where in a RST packet is sent. 
    log.Println("Error during response", err)
@@ -105,7 +98,7 @@ func (s *server) handleConnection(conn net.Conn, config Config) {
    originalPortStr := strconv.Itoa(int(originalPort))
    writeData := conn.RemoteAddr().String() + " -> " + originalPortStr + "\n"
 
-   file, err = os.OpenFile(logFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+   file, err := os.OpenFile(logFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
    if err != nil {
       log.Println("Error on log write, closing write pointer. ", err)
       if err := file.Close(); err != nil {
@@ -124,9 +117,10 @@ func (s *server) handleConnection(conn net.Conn, config Config) {
 }
 
 func (s *server) Start(config Config) {
- s.wg.Add(2)
- go s.acceptConnections()
- go s.handleConnections(config)
+   
+      s.wg.Add(2)
+      go s.acceptConnections()
+      go s.handleConnections(config)
 }
 
 func (s *server) Stop() {
@@ -146,6 +140,22 @@ func (s *server) Stop() {
   fmt.Println("Timed out waiting for connections to finish.")
   return
  }
+}
+
+func getOriginalPort(conn net.Conn) uint16 {
+   const SO_ORIGINAL_DST = 80;
+   file, err := conn.(*net.TCPConn).File()
+   if err != nil {
+      fmt.Println("ERROR WITH TCPConn", err)
+   }
+   defer file.Close()
+   addr, err := syscall.GetsockoptIPv6Mreq(int(file.Fd()), syscall.IPPROTO_IP, SO_ORIGINAL_DST)
+   if err != nil {
+      fmt.Println("ERROR WITH SYSCALL: ", err)
+   }
+  
+   originalPort := uint16(addr.Multiaddr[2])<<8 + uint16(addr.Multiaddr[3])
+   return originalPort
 }
 
 func startServer(config Config) {
