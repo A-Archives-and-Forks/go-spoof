@@ -54,6 +54,8 @@ Usage of ./goSpoof:
         Provide a range of ports (1-10) or a list of ports 1,9,32, or a single port (default "1-65535")
   -sT string
         setup iptables to bind to a single port (bind to this port using -p). Specify specific range of ports to redirect FROM with -r (default None)
+  -w string
+        specify a number of seconds to wait between sending signatures. Significantly slows down scanning with -sV
   -v string
         be verbose (default None)
 ```
