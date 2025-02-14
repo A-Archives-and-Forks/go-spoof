@@ -75,7 +75,6 @@ func (s *server) handleConnection(conn net.Conn, config Config) {
 
  //init SO_ORIGINAL_DST, doesn't matter what goes in here, just need something for the GetsocketIPv6Mreq function below
  const SO_ORIGINAL_DST = 80;
- //fmt.Println(conn.RemoteAddr().String())
  file, err := conn.(*net.TCPConn).File()
  if err != nil {
     fmt.Println("ERROR WITH TCPConn", err)
@@ -96,7 +95,6 @@ func (s *server) handleConnection(conn net.Conn, config Config) {
 
  if err != nil && !strings.Contains(err.Error(), "connection reset by peer") { //A standard nmap scan does not close TCP connections resulting in RST packets - ignore any error where in a RST packet is sent. 
    log.Println("Error during response", err)
-   return
  } 
 
  
