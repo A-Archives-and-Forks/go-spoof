@@ -281,25 +281,16 @@ func processSignatureFile(config Config, minPort int, maxPort int, intPortArray 
 
 
 	rand.Seed(time.Now().UnixNano())
-	//re := regexp.MustCompile(`\\x[0-9a-fA-F]{2}`)
-	//re2 := regexp.MustCompile(`\0`)
 	var signatureLine string
 
 
 	for i:=minPort;i <= maxPort; i++ {
 		signatureLine = signatureLines[rand.Intn(len(signatureLines))]
-
 		generator, err := regen.NewGenerator(signatureLine, &regen.GeneratorArgs{Flags: syntax.PerlX, MaxUnboundedRepeatCount: 3})
 		if err != nil {
-			log.Println("Critical Error", err)
-			os.Exit(1)
+			log.Fatal("Critical Error", err)
 		}
 		output := generator.Generate()
-
-		
-		//process hex values
-		//output = re.ReplaceAllStringFunc(signatureLine, replaceHex)
-		//output = re2.ReplaceAllStringFunc(signatureLine, \0)
 
 		if isList == false {
 			portSignatureMap[i] = output
