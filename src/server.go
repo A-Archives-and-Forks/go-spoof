@@ -48,10 +48,6 @@ func (s *server) acceptConnections() {
    return
   default:
    conn, err := s.listener.Accept()
-   originalPort := getOriginalPort(conn)
-   if int(originalPort) == 2 {
-      return
-   }
    if err != nil {
     continue
    }
