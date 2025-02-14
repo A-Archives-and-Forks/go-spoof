@@ -61,10 +61,9 @@ func config() Config{
 	//Command line flags (FLAG, DEFAULT, HELP)
 	configuration.IP 					    = flag.String("i", addr, "ip : Bind to a particular IP address")
 	configuration.Port 						= flag.String("p", "4444", "port : bind to a particular PORT number")
-	configuration.ServiceSignaturePath 		= flag.String("s", " ", "file_path : go-spoof service signature regex. file")
+	configuration.ServiceSignaturePath 		= flag.String("s", "../tools/portspoof_signatures", "file_path : go-spoof service signature regex. file")
 	configuration.LoggingFilePath			= flag.String("l", " ", "file_path : log port scanning alerts to a file")
 	configuration.Daemon 					= flag.String("D", " ", "run as daemon process")
-	configuration.Verbosity 				= flag.String("v", " ", "be verbose")
 	configuration.SpoofPorts                = flag.String("sP", "1-65535", "Provide a range of ports (1-10) or a list of ports 1,9,32, or a single port")
 	configuration.StartTables				= flag.String("sT", " ", "setup iptables to bind to a single port (bind to this port using -p). Specify specific range of ports to redirect FROM with -r")
 		configuration.TablesRange 				= flag.String("r", "1:65535", "port range for iptables to redirect from. Format is (low port):(high port) Must be used with -sT arg")
@@ -95,11 +94,7 @@ func getIP() string {
 }
 
 func processArgs(config Config) Config {
-	//Start / stop iptables 
 
-	//process default ports - need to take in range and comma separated list
-
-	//figure out how to run as a daemon 
 
 	minPort := 1; 
     maxPort := 65535; 
