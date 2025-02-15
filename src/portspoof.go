@@ -30,7 +30,7 @@ func main(){
 				LogFilePerm: 0640,
 				WorkDir: "./", 
 				Umask: 027,
-				Args: []string{"goSpoof", "-i", *config.IP, "-p", *config.Port, "-s", *config.ServiceSignaturePath, "-l", *config.LoggingFilePath, "-sP", *config.SpoofPorts, "-sT", *config.StartTables, "-r", *config.TablesRange, "-fT", *config.FlushTables, "-oS", *config.OnStart, "-Y", *config.Yaml},  
+				Args: []string{"goSpoof", "-i", *config.IP, "-p", *config.Port, "-s", *config.ServiceSignaturePath, "-l", *config.LoggingFilePath, "-sP", *config.SpoofPorts, "-sT", *config.StartTables, "-r", *config.TablesRange, "-fT", *config.FlushTables, "-Y", *config.Yaml},  
 			}
 
 			daemon, err := cntxt.Reborn()
