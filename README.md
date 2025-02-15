@@ -42,8 +42,6 @@ Usage of ./goSpoof:
         ip : Bind to a particular IP address (default if none specified, goSpoof will grab your IP)
   -l string
         file_path : log port scanning alerts to a file (default None)
-  -oS string
-        start go-spoof on boot (default None)
   -p string
         port : bind to a particular PORT number (default "4444")
   -r string
