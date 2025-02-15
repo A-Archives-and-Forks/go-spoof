@@ -25,8 +25,8 @@ import (
 	"strconv"
 	"github.com/AnatolyRugalev/goregen"
 	"regexp/syntax"
-	"encoding/hex"
 	"os/exec"
+	"sync"
 )
 
 type Config struct {
@@ -54,17 +54,16 @@ func config() Config{
 	//Get default IP
 	addr := getIP()
 	if addr == "1" {
-		log.Println("Error getting default IP - try manually providing the IP")
-		os.Exit(1)
+		log.Fatal("Error getting default IP - try manually providing the IP")
+		
 	}
 
 	//Command line flags (FLAG, DEFAULT, HELP)
 	configuration.IP 					    = flag.String("i", addr, "ip : Bind to a particular IP address")
 	configuration.Port 						= flag.String("p", "4444", "port : bind to a particular PORT number")
-	configuration.ServiceSignaturePath 		= flag.String("s", " ", "file_path : go-spoof service signature regex. file")
+	configuration.ServiceSignaturePath 		= flag.String("s", "../tools/portspoof_signatures", "file_path : go-spoof service signature regex. file")
 	configuration.LoggingFilePath			= flag.String("l", " ", "file_path : log port scanning alerts to a file")
 	configuration.Daemon 					= flag.String("D", " ", "run as daemon process")
-	configuration.Verbosity 				= flag.String("v", " ", "be verbose")
 	configuration.SpoofPorts                = flag.String("sP", "1-65535", "Provide a range of ports (1-10) or a list of ports 1,9,32, or a single port")
 	configuration.StartTables				= flag.String("sT", " ", "setup iptables to bind to a single port (bind to this port using -p). Specify specific range of ports to redirect FROM with -r")
 		configuration.TablesRange 				= flag.String("r", "1:65535", "port range for iptables to redirect from. Format is (low port):(high port) Must be used with -sT arg")
@@ -79,7 +78,7 @@ func config() Config{
 func getIP() string {
 	addr, err := net.InterfaceAddrs()
 	if err != nil {
-		log.Println(err)
+		log.Fatal(err)
 		return "1"
 	}
 
@@ -95,11 +94,7 @@ func getIP() string {
 }
 
 func processArgs(config Config) Config {
-	//Start / stop iptables 
 
-	//process default ports - need to take in range and comma separated list
-
-	//figure out how to run as a daemon 
 
 	minPort := 1; 
     maxPort := 65535; 
@@ -126,12 +121,12 @@ func processArgs(config Config) Config {
 				for i := 0; i < len(portArray); i++ {
 					holder, err = strconv.Atoi(portArray[i])
 					if err != nil {
-						log.Println("Error in converting string in port array to int", err)
+						log.Fatal("Error in converting string in port array to int", err)
 					}
 
 					if holder > 65535 {
-						log.Println("A port in the provided list exceeds the port maximum of 65535")
-						os.Exit(1)
+						log.Fatal("A port in the provided list exceeds the port maximum of 65535")
+						
 					}
 
 					intPortArray = append(intPortArray, holder)
@@ -144,26 +139,26 @@ func processArgs(config Config) Config {
 
 				maxPort, err = strconv.Atoi(portRange[1])
 				if err != nil {
-					log.Println("maxPort cast to int error", err)
-					os.Exit(1)
+					log.Fatal("maxPort cast to int error", err)
+					
 				}
 				minPort, err = strconv.Atoi(portRange[0])
 				if err != nil {
-					log.Println("minPort cast to int error", err)
+					log.Fatal("minPort cast to int error", err)
 				}
 
 				//If user provides bad arguments (e.g. 1-100-200, 1-999999, 999-1)
 				if len(portRange) > 2 {
-					log.Println("Invalid range. Include only TWO numbers: LOW-HIGH")
-					os.Exit(1)
+					log.Fatal("Invalid range. Include only TWO numbers: LOW-HIGH")
+					
 				}
 				if maxPort > 65535 || maxPort < 0 || minPort > 65535 || minPort < 0 {
-					log.Println("Invalid port number in -sP - port range must be between 0 and 65535")
-					os.Exit(1)
+					log.Fatal("Invalid port number in -sP - port range must be between 0 and 65535")
+					
 				}
 				if minPort > maxPort {
-					log.Println("Lower range should be lower than upper range!")
-					os.Exit(1)
+					log.Fatal("Lower range should be lower than upper range!")
+					
 				}
 			} else if !strings.Contains(ports, "-") && !strings.Contains(ports, ",") {
 				maxPort, _ = strconv.Atoi(ports) 
@@ -172,7 +167,7 @@ func processArgs(config Config) Config {
 			}
 		} else {
 			log.Println("Do not include spaces in port range/list")
-			os.Exit(0)
+			
 		}
 	} 
 	if *config.StartTables != " " {
@@ -184,40 +179,40 @@ func processArgs(config Config) Config {
 			if strings.Contains(iptablesRange, ":") {
 				rangeArray = strings.Split(iptablesRange, ":")
 			} else {
-				log.Println("Format for -r - <LOW PORT>:<HIGH PORT> - invalid input")
-				os.Exit(1)
+				log.Fatal("Format for -r - <LOW PORT>:<HIGH PORT> - invalid input")
+				
 			}
 
 			upperRange, err := strconv.Atoi(rangeArray[1])
 			if err != nil {
-				log.Println("Error in string to int conversion ", err)
-				os.Exit(1)
+				log.Fatal("Error in string to int conversion ", err)
+				
 			}
 			lowerRange, err := strconv.Atoi(rangeArray[0])
 			if err != nil {
-				log.Println("Error in string to int conversion", err)
-				os.Exit(1)
+				log.Fatal("Error in string to int conversion", err)
+				
 			}
 
 			if upperRange < lowerRange {
-				log.Println("Upper range must be greater than or equal to lower range")
-				os.Exit(1)
+				log.Fatal("Upper range must be greater than or equal to lower range")
+				
 			}
 			if upperRange > 65535 || upperRange < 0 || lowerRange > 65535 || lowerRange < 0 {
-				log.Println("Invalid port number in -r - port range must be between 0 and 65535")
+				log.Fatal("Invalid port number in -r - port range must be between 0 and 65535")
 			}
 		}
 		
 		intPort, err := strconv.Atoi(*config.StartTables) 
 		if err != nil {
-			log.Println("Error in converting port string input to int.", err)
-			os.Exit(1)
+			log.Fatal("Error in converting port string input to int.", err)
+			
 		}
 		port := *config.StartTables
 
 		if intPort > 65535 || intPort < 0  {
-			log.Println("Invalid port number in -sT - port must be between 0 and 65535")
-			os.Exit(1)
+			log.Fatal("Invalid port number in -sT - port must be between 0 and 65535")
+			
 		}
 
 
@@ -225,8 +220,8 @@ func processArgs(config Config) Config {
 		_, err = cmd.Output()
 		if err != nil {
 			log.Println("iptables command failed", err)
-			log.Println("Note: -sT arg requires ROOT privs!")
-			os.Exit(1)
+			log.Fatal("Note: -sT arg requires ROOT privs!")
+			
 		} else {
 			log.Println("iptables command routing traffic to port ", port)
 			os.Exit(0)
@@ -237,16 +232,12 @@ func processArgs(config Config) Config {
 		_, err := cmd.Output()
 		if err != nil {
 			log.Println("Flush iptables failed", err)
-			log.Println("Are you running the -fT arg with root privs?")
-			os.Exit(1)
+			log.Fatal("Are you running the -fT arg with root privs?")
+			
 		} else {
 			log.Println("Flushed successfully - exiting")
+			os.Exit(0)
 		}
-		os.Exit(0)
-	} 
-	if *config.OnStart == "Y" || *config.OnStart == "y" {
-		log.Println("Start go-spoof on boot")
-		os.Exit(0)
 	} 
 	if *config.SleepOpt != "0" {
 		_, err := strconv.Atoi(*config.SleepOpt)
@@ -254,17 +245,68 @@ func processArgs(config Config) Config {
 			log.Fatal("Invalid option for -w. Please input a number")
 		}
 	}
+	log.Println("Creating Signature Port Map - Allow up to 10 seconds for larger ranges!")
+	if maxPort > 10000 && isList == false{
+		chunkSize := 5000
+		//chunkChannel := make(chan map[int]string, (maxPort+chunkSize-1)/chunkSize) //map of maps
+		chunks := make([]map[int]string, (maxPort+chunkSize-1)/chunkSize) //map of maps
+		
+
+		for i := range chunks {
+			chunks[i] = make(map[int]string) //assign a int to string map for each 10000 chunk
+		}
+
+		var wg sync.WaitGroup
+		var startIndex int;
+		var endIndex int; 
+
+		for i := range chunks {
+			wg.Add(1)
+
+			if i == 0 {
+				startIndex = 1 + i // 1
+				endIndex = chunkSize // 10000
+			} else {
+				startIndex = i * chunkSize //X0000
+				endIndex = startIndex + chunkSize //(X + C)0000 
+				startIndex = startIndex + 1 //(X0001)
+			}
+
+			if maxPort < endIndex {
+				endIndex = maxPort
+			}
+
+			go func(i int, config Config, startIndex int, endIndex int, intPortArray []int, isList bool) {
+				defer wg.Done()
+				signatureMap :=  processSignatureFile(config, startIndex, endIndex, intPortArray, isList)
+				chunks[i] = signatureMap
+
+			}(i, config, startIndex, endIndex, intPortArray, isList)
+		}
+		wg.Wait()
+		finalMap := make(map[int]string, maxPort)
+		for _, chunk := range chunks {
+			for k, v := range chunk {
+				finalMap[k] = v
+			}
+		}
+		config.PortSignatureMap = finalMap
+		return config
+	} else {
+		config.PortSignatureMap = processSignatureFile(config, minPort, maxPort, intPortArray, isList)
+	}
 
 
-	config = processSignatureFile(config, minPort, maxPort, intPortArray, isList) //read signatures from configuration file
+
+	//config = processSignatureFile(config, minPort, maxPort, intPortArray, isList) //read signatures from configuration file
 	return config
 }
 
 //Processes the signature file and returns a map of port:signature
-func processSignatureFile(config Config, minPort int, maxPort int, intPortArray []int, isList bool) Config {
+func processSignatureFile(config Config, minPort int, maxPort int, intPortArray []int, isList bool) map[int]string {
 
 	var signatureLines []string;
-	portSignatureMap := make(map[int]string)
+	portSignatureMap := make(map[int]string, maxPort)
 
 	file, err := os.Open(*config.ServiceSignaturePath)
 	if err != nil {
@@ -283,7 +325,6 @@ func processSignatureFile(config Config, minPort int, maxPort int, intPortArray 
 	rand.Seed(time.Now().UnixNano())
 	var signatureLine string
 
-
 	for i:=minPort;i <= maxPort; i++ {
 		signatureLine = signatureLines[rand.Intn(len(signatureLines))]
 		generator, err := regen.NewGenerator(signatureLine, &regen.GeneratorArgs{Flags: syntax.PerlX, MaxUnboundedRepeatCount: 3})
@@ -298,22 +339,13 @@ func processSignatureFile(config Config, minPort int, maxPort int, intPortArray 
 			portSignatureMap[intPortArray[i]] = output
 		}
 	}
-	config.PortSignatureMap = portSignatureMap
+	//config.PortSignatureMap = portSignatureMap
 
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)
 	}
-	return config
+	return portSignatureMap
 }
 
-func replaceHex(match string) string {
-	hexValue := match[2:]
-	bytes, err := hex.DecodeString(hexValue)
-	if err != nil {
-		log.Println("Error decoding hex string: ", err)
-		return match
-	}
-	return string(bytes)
-}
 
 
