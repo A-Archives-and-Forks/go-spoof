@@ -68,7 +68,6 @@ func config() Config{
 	configuration.StartTables				= flag.String("sT", " ", "setup iptables to bind to a single port (bind to this port using -p). Specify specific range of ports to redirect FROM with -r")
 		configuration.TablesRange 				= flag.String("r", "1:65535", "port range for iptables to redirect from. Format is (low port):(high port) Must be used with -sT arg")
 	configuration.FlushTables				= flag.String("fT", " ", "reset iptables")
-	configuration.OnStart					= flag.String("oS", " ", "start go-spoof on boot")
 	configuration.Yaml						= flag.String("Y", " ", "load configuration from yaml file")
 	configuration.SleepOpt					= flag.String("w", "0", "provide a number of seconds to slow down service scan per port")
 	flag.Parse()
