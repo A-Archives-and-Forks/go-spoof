@@ -1,7 +1,6 @@
 # GO-SPOOF
 
-- GO-SPOOF provides the same functionality as the original portspoof (https://github.com/drk1wi/portspoof) with a few additional features. 
-
+- GO-SPOOF provides the same functionality as the original portspoof (https://github.com/drk1wi/portspoof)
 
 # Setup!
 
