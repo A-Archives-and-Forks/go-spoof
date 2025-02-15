@@ -30,7 +30,7 @@ func main(){
 				LogFilePerm: 0640,
 				WorkDir: "./", 
 				Umask: 027,
-				Args: []string{"main", "-i", *config.IP, "-p", *config.Port, "-s", *config.ServiceSignaturePath, "-l", *config.LoggingFilePath, "-v", *config.Verbosity, "-sP", *config.SpoofPorts, "-sT", *config.StartTables, "-r", *config.TablesRange, "-fT", *config.FlushTables, "-oS", *config.OnStart, "-Y", *config.Yaml},  
+				Args: []string{"goSpoof", "-i", *config.IP, "-p", *config.Port, "-s", *config.ServiceSignaturePath, "-l", *config.LoggingFilePath, "-sP", *config.SpoofPorts, "-sT", *config.StartTables, "-r", *config.TablesRange, "-fT", *config.FlushTables, "-oS", *config.OnStart, "-Y", *config.Yaml},  
 			}
 
 			daemon, err := cntxt.Reborn()
@@ -38,7 +38,7 @@ func main(){
 				log.Fatal("RIP", err)
 			}
 			if daemon != nil {
-				log.Println("UP!")
+				log.Println("Running as Daemon - allow up to 10 seconds to fully initialize")
 				return
 			}
 
