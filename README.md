@@ -1,3 +1,4 @@
+![logo](./img/gospoof.png)
 # GO-SPOOF
 
 - GO-SPOOF provides the same functionality as the original portspoof (https://github.com/drk1wi/portspoof)
