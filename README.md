@@ -42,7 +42,7 @@ cp ./goSpoof bin
 
 # HELP!
 
-```
+```python
 Usage of ./goSpoof:
   -D string
         run as daemon process (default None)
