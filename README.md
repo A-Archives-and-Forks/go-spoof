@@ -1,9 +1,8 @@
 ![logo](./img/gospoof.png)
 # GO-SPOOF
+GO-SPOOF is a recreation of the cyber deception tool [portspoof](https://github.com/drk1wi/portspoof). GO-SPOOF provides the same features as portspoof with some upgrades to functionality and realiability.
 
-- GO-SPOOF provides the same functionality as the original portspoof (https://github.com/drk1wi/portspoof)
-
-# Setup!
+## Setup
 
 Portspoof requires all traffic to be directed to a single port. 
 Run either of the following commands to setup the iptables rule to redirect to port 4444:
@@ -40,7 +39,7 @@ Move it into bin using the following command:
 cp ./goSpoof bin
 ```
 
-# HELP!
+## Usage and CLI Structure
 
 ```python
 Usage of ./goSpoof:
@@ -69,3 +68,5 @@ Usage of ./goSpoof:
   -v string
         be verbose (default None)
 ```
+Owned by Black Hills Infosec
+Created by her3tic and redwingblackbird
