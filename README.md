@@ -8,25 +8,37 @@
 Portspoof requires all traffic to be directed to a single port. 
 Run either of the following commands to setup the iptables rule to redirect to port 4444:
 
-```./src/goSpoof -sT 4444```
+```bash
+./src/goSpoof -sT 4444
+```
 
-```sudo iptables -t nat -A PREROUTING -p tcp -m tcp --dport 1:65535 -j REDIRECT --to-ports 4444```
+```bash
+sudo iptables -t nat -A PREROUTING -p tcp -m tcp --dport 1:65535 -j REDIRECT --to-ports 4444
+```
 
 After running, cd into the src directory.
 
-```cd src```
+```bash
+cd src
+```
 
 The executable "goSpoof" should already exist in the directory - if not, rebuild it using the following: 
 
-```go build -o goSpoof```
+```bash
+go build -o goSpoof
+```
 
 Run the executable
 
-```./goSpoof```
+```bash
+./goSpoof
+```
 
 Move it into bin using the following command: 
 
-```cp ./goSpoof bin```
+```bash
+cp ./goSpoof bin
+```
 
 # HELP!
 
