@@ -1,6 +1,6 @@
 ![logo](./img/gospoof.png)
 # GO-SPOOF
-GO-SPOOF is a recreation of the cyber deception tool [portspoof](https://github.com/drk1wi/portspoof). GO-SPOOF provides the same features as portspoof with some upgrades to functionality and realiability.
+GO-SPOOF is a recreation of the cyber deception tool [portspoof](https://github.com/drk1wi/portspoof). GO-SPOOF provides the same features as portspoof with some upgrades to functionality and reliability.
 
 ## Setup
 
