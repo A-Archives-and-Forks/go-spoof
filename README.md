@@ -22,6 +22,8 @@
 </div>
 <hr>
 
+<div align="left">
+
 ## Setup
 
 Portspoof requires all traffic to be directed to a single port. 
@@ -88,5 +90,7 @@ Usage of ./goSpoof:
   -v string
         be verbose (default None)
 ```
+
+<div align="center">
 
 Made with ❤️ by Black Hills Infosec
