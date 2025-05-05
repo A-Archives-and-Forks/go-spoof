@@ -1,6 +1,26 @@
-![logo](./img/gospoof.png)
-# GO-SPOOF
-GO-SPOOF is a recreation of the cyber deception tool [portspoof](https://github.com/drk1wi/portspoof). GO-SPOOF provides the same features as portspoof with some upgrades to functionality and reliability.
+<div align="center">
+<a href="https://blackhillsinfosec.com"><img width="100%" src="./img/banner.png" alt="GoSpoof Logo" /></a>
+<hr>
+  <a href="https://github.com/blackhillsinfosec/go-spoof/actions"><img alt="GitHub Workflow Status" src="https://img.shields.io/github/actions/workflow/status/blackhillsinfosec/go-spoof/.github%2Fworkflows%2Fpython-app.yml?style=flat-square"></a> 
+  &nbsp;
+  <a href="https://discord.com/invite/bhis"><img alt="Discord" src="https://img.shields.io/discord/967097582721572934?label=Discord&color=7289da&style=flat-square" /></a>
+  &nbsp;
+  <a href="https://github.com/blackhillsinfosec/go-spoof/graphs/contributors"><img alt="npm" src="https://img.shields.io/github/contributors-anon/blackhillsinfosec/go-spoof?color=yellow&style=flat-square" /></a>
+  &nbsp;
+  <a href="https://x.com/BHinfoSecurity"><img src="https://img.shields.io/badge/follow-BHIS-1DA1F2?logo=twitter&style=flat-square" alt="BHIS Twitter" /></a>
+  &nbsp;
+  <a href="https://x.com/BHinfoSecurity"><img src="https://img.shields.io/github/stars/blackhillsinfosec/go-spoof?style=flat-square&color=rgb(255%2C218%2C185)" alt="GoSpoof Stars" /></a>
+
+<p class="align center">
+<h4><code>GoSpoof</code> is a push torwards bringing cyber deceptive tooling back into your defensive toolkit. This tool was directly inspired by the tool portspoof.</h4>
+</p>
+
+<div style="text-align: center;">
+  <h4>
+    <a target="_blank" href="https://www.blackhillsinfosec.com/go-spoof-a-tool-for-cyber-deception/" rel="dofollow"><strong>Blog Post</strong></a>
+  </h4>
+</div>
+<hr>
 
 ## Setup
 
@@ -68,5 +88,5 @@ Usage of ./goSpoof:
   -v string
         be verbose (default None)
 ```
-Owned by Black Hills Infosec
-Created by her3tic and redwingblackbird
+
+Made with ❤️ by Black Hills Infosec
