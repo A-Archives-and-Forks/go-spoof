@@ -89,6 +89,11 @@ Usage of ./goSpoof:
         specify a number of seconds to wait between sending signatures. Significantly slows down scanning with -sV
   -v string
         be verbose (default None)
+  -honey
+      Use -honey Y to activate a Honeypot Mode. This will give you an attackers IP as well as the date and time of the attack and what payloads were sent. This is then saved in honeypot.log
+   -t
+      Assign a value 1-5 to thottle time for a scan 1 = 5 minutes and doubles through each level to 5 = 80 minutes
+      
 ```
 
 <div align="center">
