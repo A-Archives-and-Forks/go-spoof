@@ -95,9 +95,7 @@ func (s *server) handleConnections(config Config) {
 	}
 }
 
-//HoneyPot Start
-
-// THIS IS WHERE WE LIE TO THE ATTACKER >:)
+// honey start
 func (s *server) handleConnection(conn net.Conn, config Config) {
 	defer conn.Close()
 
@@ -140,7 +138,7 @@ func (s *server) handleConnection(conn net.Conn, config Config) {
 		}
 	}
 
-	if err != nil && !strings.Contains(err.Error(), "connection reset by peer") { //A standard nmap scan does not close TCP connections resulting in RST packets - ignore any error where in a RST packet is sent.
+	if err != nil && !strings.Contains(err.Error(), "connection reset by peer") {
 		log.Println("Error during response", err)
 	}
 
@@ -169,7 +167,7 @@ func (s *server) handleConnection(conn net.Conn, config Config) {
 	}
 }
 
-//Honeypot end
+//end of honey
 
 func (s *server) Start(config Config) {
 

@@ -46,6 +46,7 @@ type Config struct {
 	SleepOpt              *string
 	PortSignatureMap      map[int]string
 	HoneypotMode          *string
+	ThrottleLevel         *string
 }
 
 func config() Config {
@@ -72,6 +73,7 @@ func config() Config {
 	configuration.Yaml = flag.String("Y", " ", "load configuration from yaml file")
 	configuration.SleepOpt = flag.String("w", "0", "provide a number of seconds to slow down service scan per port")
 	configuration.HoneypotMode = flag.String("honey", "N", "Enable honeypot mode to log the attackers info (Y/N)")
+	configuration.ThrottleLevel = flag.String("t", "0", "throttle delay level (1 to 5): delays 5, 10, 30, 40, 80 minutes")
 	flag.Parse()
 	return configuration
 }
@@ -100,6 +102,17 @@ func processArgs(config Config) Config {
 	var err error
 	var intPortArray []int
 	isList := false
+
+	if *config.ThrottleLevel != "0" {
+		level, err := strconv.Atoi(*config.ThrottleLevel)
+		if err != nil || level < 1 || level > 5 {
+			log.Fatal("Invalid throttle level for -t. Use -t1 to -t5.")
+		}
+		delayMinutes := 5 * (1 << (level - 1))
+
+		// convert it to a string that looks like a number of minutes, stored in config.SleepOpt
+		*config.SleepOpt = strconv.Itoa(delayMinutes * 60)
+	}
 
 	if *config.SpoofPorts != "1-65535" {
 		ports := *config.SpoofPorts
