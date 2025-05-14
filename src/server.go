@@ -1,180 +1,237 @@
 /*
-GO-SPOOF 
+GO-SPOOF
 
-Server.go establishes the server and 
-handles connections. 
+Server.go establishes the server and
+handles connections.
 */
 package main
 
 import (
- "fmt"
- "net"
- "os"
- "os/signal"
- "sync"
- "syscall"
- "time"
- "log"
- "strconv"
- "strings"
+	"fmt"
+	"log"
+	"net"
+	"os"
+	"os/signal"
+	"strconv"
+	"strings"
+	"sync"
+	"syscall"
+	"time"
+	"unsafe"
 )
 
+type ipv6Mreq struct {
+	Multiaddr [16]byte
+	Ifindex   uint32
+}
+
+const SYS_GETSOCKOPT = 55
+
 type server struct {
- wg         sync.WaitGroup
- listener   net.Listener
- shutdown   chan struct{}
- connection chan net.Conn
+	wg         sync.WaitGroup
+	listener   net.Listener
+	shutdown   chan struct{}
+	connection chan net.Conn
+}
+
+func GetsockoptIPv6Mreq(fd int, level int, opt int) (*ipv6Mreq, error) {
+	var mreq ipv6Mreq
+	size := uint32(unsafe.Sizeof(mreq))
+	_, _, errno := syscall.Syscall6(
+		SYS_GETSOCKOPT,
+		uintptr(fd),
+		uintptr(level),
+		uintptr(opt),
+		uintptr(unsafe.Pointer(&mreq)),
+		uintptr(unsafe.Pointer(&size)),
+		uintptr(0),
+		uintptr(0),
+	)
+	if errno != 0 {
+		return nil, errno
+	}
+	return &mreq, nil
 }
 
 func newServer(address string) (*server, error) {
- listener, err := net.Listen("tcp", address)
- if err != nil {
-  return nil, fmt.Errorf("failed to listen on address %s: %w", address, err)
- }
+	listener, err := net.Listen("tcp", address)
+	if err != nil {
+		return nil, fmt.Errorf("failed to listen on address %s: %w", address, err)
+	}
 
- return &server{
-  listener:   listener,
-  shutdown:   make(chan struct{}),
-  connection: make(chan net.Conn),
- }, nil
+	return &server{
+		listener:   listener,
+		shutdown:   make(chan struct{}),
+		connection: make(chan net.Conn),
+	}, nil
 }
 
 func (s *server) acceptConnections() {
- defer s.wg.Done()
+	defer s.wg.Done()
 
- for {
-  select {
-  case <-s.shutdown:
-   return
-  default:
-   conn, err := s.listener.Accept()
-   if err != nil {
-    continue
-   }
-   s.connection <- conn
-  }
- }
+	for {
+		select {
+		case <-s.shutdown:
+			return
+		default:
+			conn, err := s.listener.Accept()
+			if err != nil {
+				continue
+			}
+			s.connection <- conn
+		}
+	}
 }
 
 func (s *server) handleConnections(config Config) {
- defer s.wg.Done()
+	defer s.wg.Done()
 
- for {
-  select {
-  case <-s.shutdown:
-   return
-  case conn := <-s.connection:
-   go s.handleConnection(conn, config)
-  }
- }
+	for {
+		select {
+		case <-s.shutdown:
+			return
+		case conn := <-s.connection:
+			go s.handleConnection(conn, config)
+		}
+	}
 }
 
-//THIS IS WHERE WE LIE TO THE ATTACKER >:)
+//HoneyPot Start
+
+// THIS IS WHERE WE LIE TO THE ATTACKER >:)
 func (s *server) handleConnection(conn net.Conn, config Config) {
- defer conn.Close()
+	defer conn.Close()
 
- //init SO_ORIGINAL_DST, doesn't matter what goes in here, just need something for the GetsocketIPv6Mreq function below
- originalPort := getOriginalPort(conn)
- signature := config.PortSignatureMap[int(originalPort)]
+	//init SO_ORIGINAL_DST, doesn't matter what goes in here, just need something for the GetsocketIPv6Mreq function below
+	originalPort := getOriginalPort(conn)
+	signature := config.PortSignatureMap[int(originalPort)]
 
- seconds, _ := strconv.Atoi(*config.SleepOpt)
- time.Sleep(time.Second * time.Duration(seconds))
- 
- _, err := conn.Write([]byte(signature))
+	seconds, _ := strconv.Atoi(*config.SleepOpt)
+	time.Sleep(time.Second * time.Duration(seconds))
 
- if err != nil && !strings.Contains(err.Error(), "connection reset by peer") { //A standard nmap scan does not close TCP connections resulting in RST packets - ignore any error where in a RST packet is sent. 
-   log.Println("Error during response", err)
- } 
+	_, err := conn.Write([]byte(signature))
+	if *config.HoneypotMode == "Y" || *config.HoneypotMode == "y" {
+		remoteAddr := conn.RemoteAddr().String()
+		timestamp := time.Now().Format("2006-01-02 15:04:05")
 
- 
- //log the connection if logging is enabled
- if *config.LoggingFilePath != " " {
-   logFilePath := *config.LoggingFilePath
+		// read data sent by client (if any)
+		conn.SetReadDeadline(time.Now().Add(2 * time.Second)) // timeout
+		buffer := make([]byte, 1024)
+		n, _ := conn.Read(buffer)
+		requestData := string(buffer[:n])
 
-   originalPortStr := strconv.Itoa(int(originalPort))
-   writeData := conn.RemoteAddr().String() + " -> " + originalPortStr + "\n"
+		// format log entry
+		logEntry := fmt.Sprintf(
+			"[HONEYPOT] %s | IP: %s | Port: %d | Data: %q\n",
+			timestamp,
+			remoteAddr,
+			originalPort,
+			requestData,
+		)
 
-   file, err := os.OpenFile(logFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-   if err != nil {
-      log.Println("Error on log write, closing write pointer. ", err)
-      if err := file.Close(); err != nil {
-         log.Fatal("Error on close, killing program. ", err)
-      }
-   }
+		fmt.Print(logEntry)
 
-   _, err = file.Write([]byte(writeData))
-   if err != nil {
-      log.Println("Error writing to log!")
-      file.Close()
-   } else {
-      file.Close()
-   }
- }
+		// save to honeypot.log
+		file, err := os.OpenFile("honeypot.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		if err == nil {
+			defer file.Close()
+			file.WriteString(logEntry)
+		} else {
+			log.Println("Failed to write honeypot log:", err)
+		}
+	}
+
+	if err != nil && !strings.Contains(err.Error(), "connection reset by peer") { //A standard nmap scan does not close TCP connections resulting in RST packets - ignore any error where in a RST packet is sent.
+		log.Println("Error during response", err)
+	}
+
+	//log the connection if logging is enabled
+	if *config.LoggingFilePath != " " {
+		logFilePath := *config.LoggingFilePath
+
+		originalPortStr := strconv.Itoa(int(originalPort))
+		writeData := conn.RemoteAddr().String() + " -> " + originalPortStr + "\n"
+
+		file, err := os.OpenFile(logFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		if err != nil {
+			log.Println("Error on log write, closing write pointer. ", err)
+			if err := file.Close(); err != nil {
+				log.Fatal("Error on close, killing program. ", err)
+			}
+		}
+
+		_, err = file.Write([]byte(writeData))
+		if err != nil {
+			log.Println("Error writing to log!")
+			file.Close()
+		} else {
+			file.Close()
+		}
+	}
 }
+
+//Honeypot end
 
 func (s *server) Start(config Config) {
-   
-      s.wg.Add(2)
-      go s.acceptConnections()
-      go s.handleConnections(config)
+
+	s.wg.Add(2)
+	go s.acceptConnections()
+	go s.handleConnections(config)
 }
 
 func (s *server) Stop() {
- close(s.shutdown)
- s.listener.Close()
+	close(s.shutdown)
+	s.listener.Close()
 
- done := make(chan struct{})
- go func() {
-  s.wg.Wait()
-  close(done)
- }()
+	done := make(chan struct{})
+	go func() {
+		s.wg.Wait()
+		close(done)
+	}()
 
- select {
- case <-done:
-  return
- case <-time.After(time.Second):
-  fmt.Println("Timed out waiting for connections to finish.")
-  return
- }
+	select {
+	case <-done:
+		return
+	case <-time.After(time.Second):
+		fmt.Println("Timed out waiting for connections to finish.")
+		return
+	}
 }
 
 func getOriginalPort(conn net.Conn) uint16 {
-   const SO_ORIGINAL_DST = 80;
-   file, err := conn.(*net.TCPConn).File()
-   if err != nil {
-      fmt.Println("ERROR WITH TCPConn", err)
-   }
-   defer file.Close()
-   addr, err := syscall.GetsockoptIPv6Mreq(int(file.Fd()), syscall.IPPROTO_IP, SO_ORIGINAL_DST)
-   if err != nil {
-      fmt.Println("ERROR WITH SYSCALL: ", err)
-   }
-  
-   originalPort := uint16(addr.Multiaddr[2])<<8 + uint16(addr.Multiaddr[3])
-   return originalPort
+	const SO_ORIGINAL_DST = 80
+	file, err := conn.(*net.TCPConn).File()
+	if err != nil {
+		fmt.Println("ERROR WITH TCPConn", err)
+	}
+	defer file.Close()
+	addr, err := GetsockoptIPv6Mreq(int(file.Fd()), syscall.IPPROTO_IP, SO_ORIGINAL_DST)
+	if err != nil {
+		fmt.Println("ERROR WITH SYSCALL: ", err)
+	}
+
+	originalPort := uint16(addr.Multiaddr[2])<<8 + uint16(addr.Multiaddr[3])
+	return originalPort
 }
 
 func startServer(config Config) {
- //need to pass the port we want to host the server on
+	//need to pass the port we want to host the server on
 
+	log.Println("starting server at " + *config.IP + ":" + *config.Port)
+	s, err := newServer(":" + *config.Port)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 
+	s.Start(config)
 
- log.Println("starting server at "+*config.IP+":"+*config.Port)
- s, err := newServer(":"+*config.Port)
- if err != nil {
-  fmt.Println(err)
-  os.Exit(1)
- }
+	// Wait for a SIGINT or SIGTERM signal to gracefully shut down the server
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+	<-sigChan
 
- s.Start(config)
-
- // Wait for a SIGINT or SIGTERM signal to gracefully shut down the server
- sigChan := make(chan os.Signal, 1)
- signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
- <-sigChan
-
- fmt.Println("Shutting down server...")
- s.Stop()
- fmt.Println("Server stopped.")
+	fmt.Println("Shutting down server...")
+	s.Stop()
+	fmt.Println("Server stopped.")
 }
-
