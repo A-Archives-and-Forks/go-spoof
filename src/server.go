@@ -45,7 +45,6 @@ func GetsockoptIPv6Mreq(fd int, level int, opt int) (*ipv6Mreq, error) {
 		uintptr(unsafe.Pointer(&mreq)),
 		uintptr(unsafe.Pointer(&size)),
 		uintptr(0),
-		uintptr(0),
 	)
 	if errno != 0 {
 		return nil, errno
