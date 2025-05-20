@@ -93,7 +93,8 @@ Usage of ./goSpoof:
       Use -honey Y to activate a Honeypot Mode. This will give you an attackers IP as well as the date and time of the attack and what payloads were sent. This is then saved in honeypot.log
    -t
       Assign a value 1-5 to thottle time for a scan 1 = 5 minutes and doubles through each level to 5 = 80 minutes
-      
+   -rg
+      Tunnels an intruders attacks back at them. This is a stand alone flag NO OTHER flags should be used with Rubber glue
 ```
 
 <div align="center">

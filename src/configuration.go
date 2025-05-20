@@ -47,6 +47,7 @@ type Config struct {
 	PortSignatureMap      map[int]string
 	HoneypotMode          *string
 	ThrottleLevel         *string
+	RubberGlueMode        *string
 }
 
 func config() Config {
@@ -74,6 +75,7 @@ func config() Config {
 	configuration.SleepOpt = flag.String("w", "0", "provide a number of seconds to slow down service scan per port")
 	configuration.HoneypotMode = flag.String("honey", "N", "Enable honeypot mode to log the attackers info (Y/N)")
 	configuration.ThrottleLevel = flag.String("t", "0", "throttle delay level (1 to 5): delays 5, 10, 30, 40, 80 minutes")
+	configuration.RubberGlueMode = flag.String("rg", "N", "Enable Rubber Glue mode (Y/N). Overrides all other flags")
 	flag.Parse()
 	return configuration
 }
@@ -96,6 +98,15 @@ func getIP() string {
 }
 
 func processArgs(config Config) Config {
+	//rubber glue implimentation
+	if *config.RubberGlueMode == "Y" || *config.RubberGlueMode == "y" {
+		if *config.Port != "4444" || *config.SpoofPorts != "1-65535" || *config.HoneypotMode == "Y" || *config.ThrottleLevel != "0" {
+			log.Fatal("Rubber Glue mode (-rg) must be used alone. Do not include other flags like -p, -sP, -honey, or -t.")
+		}
+		log.Println("Rubber Glue mode active. Listening and capturing...")
+		return config
+		//whole block forces exclusivity
+	}
 
 	minPort := 1
 	maxPort := 65535

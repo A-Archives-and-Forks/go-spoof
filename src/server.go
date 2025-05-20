@@ -7,6 +7,7 @@ handles connections.
 package main
 
 import (
+	"crypto/sha1"
 	"fmt"
 	"log"
 	"net"
@@ -92,6 +93,38 @@ func (s *server) handleConnections(config Config) {
 		case conn := <-s.connection:
 			go s.handleConnection(conn, config)
 		}
+	}
+}
+func runRubberGlue(config Config) {
+	ln, err := net.Listen("tcp", ":4444")
+	if err != nil {
+		log.Fatal("Failed to start Rubber Glue listener:", err)
+	}
+	defer ln.Close()
+
+	os.MkdirAll("captures", 0755)
+	log.Println("RubberGlue listener on port 4444")
+
+	for {
+		conn, err := ln.Accept()
+		if err != nil {
+			continue
+		}
+
+		go func(conn net.Conn) {
+			defer conn.Close()
+			remoteAddr := conn.RemoteAddr().String()
+			timestamp := time.Now().Format("2006-01-02 15:04:05")
+			hash := fmt.Sprintf("%x", sha1.Sum([]byte(remoteAddr+"-"+timestamp)))
+			log.Println("RubberGlue hit:", remoteAddr, "->", hash)
+
+			buf := make([]byte, 4096)
+			n, err := conn.Read(buf)
+			if err == nil && n > 0 {
+				os.WriteFile(fmt.Sprintf("captures/%s.txt", hash), buf[:n], 0644)
+				conn.Write(buf[:n]) // reflect back
+			}
+		}(conn)
 	}
 }
 
@@ -212,6 +245,10 @@ func getOriginalPort(conn net.Conn) uint16 {
 }
 
 func startServer(config Config) {
+	if *config.RubberGlueMode == "Y" || *config.RubberGlueMode == "y" {
+		runRubberGlue(config) //rg server func
+		return
+	}
 	//need to pass the port we want to host the server on
 
 	log.Println("starting server at " + *config.IP + ":" + *config.Port)
