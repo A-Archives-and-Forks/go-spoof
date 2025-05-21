@@ -94,7 +94,7 @@ Usage of ./goSpoof:
    -t
       Assign a value 1-5 to thottle time for a scan 1 = 5 minutes and doubles through each level to 5 = 80 minutes
    -rg
-      Tunnels an intruders attacks back at them. This is a stand alone flag NO OTHER flags should be used with Rubber glue. Saves the has and plain text in a captures directory.
+      Tunnels an intruders attacks back at them. This is a stand alone flag NO OTHER flags should be used with Rubber glue. Saves the hash and plain text in a captures directory.
 ```
 
 <div align="center">
