@@ -159,7 +159,7 @@ func (s *server) handleConnection(conn net.Conn, config Config) {
 			requestData,
 		)
 
-		fmt.Print(logEntry)
+		fmt.Printf("Scanned at %s by %s\n", timestamp, remoteAddr)
 
 		// save to honeypot.log
 		file, err := os.OpenFile("honeypot.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
