@@ -30,4 +30,5 @@ jobs:
          git add goSpoof
          git commit -m "adding binary"
          git push origin main
+        working-directory: ./src
              
