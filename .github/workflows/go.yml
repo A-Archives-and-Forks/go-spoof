@@ -25,12 +25,12 @@ jobs:
         run: go build -o goSpoof
         working-directory: ./src
 
-      - name: push update
-        run: |
-         git config --global user.email "jboyd@blackhillsinfosec.com"
-         git config --global user.name "Pipeline (AUTO)"
-         git add goSpoof
-         git commit -m "adding binary"
-         git push origin main
-        working-directory: ./src
+#      - name: push update
+#        run: |
+#         git config --global user.email "jboyd@blackhillsinfosec.com"
+#         git config --global user.name "Pipeline (AUTO)"
+#         git add goSpoof
+#         git commit -m "adding binary"
+#         git push origin main
+#        working-directory: ./src
              
