@@ -12,6 +12,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"os/exec"
 	"os/signal"
 	"strconv"
 	"strings"
@@ -249,6 +250,13 @@ func startServer(config Config) {
 		runRubberGlue(config) //rg server func
 		return
 	}
+	if *config.ExcludeSSH {
+		portStr := *config.Port
+		fmt.Println("[+] Excluding port 22 from redirection")
+		exec.Command("iptables", "-t", "nat", "-A", "PREROUTING", "-p", "tcp", "--dport", "1:21", "-j", "REDIRECT", "--to-port", portStr).Run()
+		exec.Command("iptables", "-t", "nat", "-A", "PREROUTING", "-p", "tcp", "--dport", "23:65535", "-j", "REDIRECT", "--to-port", portStr).Run()
+	}
+
 	//need to pass the port we want to host the server on
 
 	log.Println("starting server at " + *config.IP + ":" + *config.Port)
