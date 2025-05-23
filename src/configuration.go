@@ -146,9 +146,12 @@ func processArgs(config Config) Config {
 		}
 
 		// create a cron job to run the boot script on startup
-		cronLine := "@reboot /etc/goSpoofBoot.sh\n"
+		cronLine := "@reboot sleep 30 && /etc/goSpoofBoot.sh\n"
 		cmd := exec.Command("crontab", "-l")
 		existingCron, _ := cmd.Output()
+		if err != nil {
+			existingCron = []byte{}
+		}
 
 		if !strings.Contains(string(existingCron), "/etc/goSpoofBoot.sh") {
 			cmd := exec.Command("bash", "-c", fmt.Sprintf("(crontab -l 2>/dev/null; echo \"%s\") | crontab -", strings.TrimSpace(cronLine)))
