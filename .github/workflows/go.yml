@@ -14,6 +14,8 @@ jobs:
 
     steps:
       - name: Checkout code
+        with:
+            TOKEN: ${{ secrets.PAT_TOKEN }}
         uses: actions/checkout@v3
 
       - name: Set up Go
@@ -26,8 +28,6 @@ jobs:
         working-directory: ./src
 
       - name: push update
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
          git config --global user.email "jboyd@blackhillsinfosec.com"
          git config --global user.name "Pipeline (AUTO)"
