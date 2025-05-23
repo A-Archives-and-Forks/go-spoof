@@ -26,7 +26,8 @@ jobs:
         working-directory: ./src
 
       - name: push update
-        env: ${{ secrets.PAT_TOKEN }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
          git config --global user.email "jboyd@blackhillsinfosec.com"
          git config --global user.name "Pipeline (AUTO)"
