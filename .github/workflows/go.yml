@@ -13,9 +13,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      with:
-        token: ${{ secrets.PAT_TOKEN }}
-        
       - name: Checkout code
         uses: actions/checkout@v3
 
