@@ -96,7 +96,7 @@ Usage of ./goSpoof:
   -rg
       Tunnels an intruders attacks back at them. This is a stand alone flag NO OTHER flags should be used with Rubber glue. Saves the hash and plain text in a captures directory.
   -e 
-      Exludes port 22 from IPTABLES rules
+      Excludes ports that are specified
 ```
 
 <div align="center">

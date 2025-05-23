@@ -48,7 +48,7 @@ type Config struct {
 	HoneypotMode          *string
 	ThrottleLevel         *string
 	RubberGlueMode        *string
-	ExcludeSSH            *bool
+	ExcludedPorts         *string
 }
 
 func config() Config {
@@ -77,7 +77,7 @@ func config() Config {
 	configuration.HoneypotMode = flag.String("honey", "N", "Enable honeypot mode to log the attackers info (Y/N)")
 	configuration.ThrottleLevel = flag.String("t", "0", "throttle delay level (1 to 5): delays 5, 10, 30, 40, 80 minutes")
 	configuration.RubberGlueMode = flag.String("rg", "N", "Enable Rubber Glue mode with -rg y. Overrides all other flags")
-	configuration.ExcludeSSH = flag.Bool("e", false, "Exclude port 22 from iptables redirect")
+	configuration.ExcludedPorts = flag.String("e", "", "Excludes ports that are specified")
 	flag.Parse()
 	return configuration
 }
