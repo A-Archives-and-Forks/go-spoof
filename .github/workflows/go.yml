@@ -13,6 +13,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      with:
+        token: ${{ secrets.PAT_TOKEN }}
+        
       - name: Checkout code
         uses: actions/checkout@v3
 
@@ -33,4 +36,5 @@ jobs:
          git commit -m "adding binary"
          git push origin main
         working-directory: ./src
+        
              
