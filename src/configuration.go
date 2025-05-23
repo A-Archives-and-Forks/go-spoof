@@ -15,6 +15,7 @@ package main
 import (
 	"bufio"
 	"flag"
+	"fmt"
 	"log"
 	"math/rand"
 	"net"
@@ -49,6 +50,7 @@ type Config struct {
 	ThrottleLevel         *string
 	RubberGlueMode        *string
 	ExcludedPorts         *string
+	BootFlag              *bool
 }
 
 func config() Config {
@@ -78,6 +80,7 @@ func config() Config {
 	configuration.ThrottleLevel = flag.String("t", "0", "throttle delay level (1 to 5): delays 5, 10, 30, 40, 80 minutes")
 	configuration.RubberGlueMode = flag.String("rg", "N", "Enable Rubber Glue mode with -rg y. Overrides all other flags")
 	configuration.ExcludedPorts = flag.String("e", "", "Excludes ports that are specified")
+	configuration.BootFlag = flag.Bool("boot", false, "Set up go-spoof to persist at boot via cron")
 	flag.Parse()
 	return configuration
 }
@@ -115,6 +118,49 @@ func processArgs(config Config) Config {
 	var err error
 	var intPortArray []int
 	isList := false
+
+	if *config.BootFlag {
+		// Remove --boot from saved args
+		args := []string{}
+		for _, arg := range os.Args[1:] {
+			if arg != "--boot" {
+				args = append(args, arg)
+			}
+		}
+
+		// detect home directory (supports sudo)
+		userHome := os.Getenv("SUDO_USER")
+		if userHome == "" {
+			userHome = os.Getenv("USER")
+		}
+		homeDir := "/home/" + userHome
+
+		// construct full command for the boot script
+		fullPath := homeDir + "/go-spoof/src/goSpoof"
+		fullCmd := fullPath + " " + strings.Join(args, " ") + " >> /var/log/gospoof_boot.log 2>&1\n"
+
+		// write the boot script to /etc
+		err := os.WriteFile("/etc/goSpoofBoot.sh", []byte("#!/bin/bash\n"+fullCmd), 0755)
+		if err != nil {
+			log.Fatalf("[-] Failed to write boot script: %v", err)
+		}
+
+		// create a cron job to run the boot script on startup
+		cronLine := "@reboot /etc/goSpoofBoot.sh\n"
+		cmd := exec.Command("crontab", "-l")
+		existingCron, _ := cmd.Output()
+
+		if !strings.Contains(string(existingCron), "/etc/goSpoofBoot.sh") {
+			cmd := exec.Command("bash", "-c", fmt.Sprintf("(crontab -l 2>/dev/null; echo \"%s\") | crontab -", strings.TrimSpace(cronLine)))
+			err := cmd.Run()
+			if err != nil {
+				log.Fatalf("[-] Failed to register cron job: %v", err)
+			}
+			log.Println("[+] Boot persistence enabled with cron job.")
+		} else {
+			log.Println("[=] Cron job already exists. Skipping.")
+		}
+	}
 
 	if *config.ThrottleLevel != "0" {
 		level, err := strconv.Atoi(*config.ThrottleLevel)
