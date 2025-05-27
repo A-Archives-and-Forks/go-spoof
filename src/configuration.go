@@ -120,7 +120,6 @@ func processArgs(config Config) Config {
 	isList := false
 
 	if *config.BootFlag {
-		// Remove --boot from saved args
 		args := []string{}
 		for _, arg := range os.Args[1:] {
 			if arg != "--boot" {
@@ -128,41 +127,53 @@ func processArgs(config Config) Config {
 			}
 		}
 
-		// detect home directory (supports sudo)
-		userHome := os.Getenv("SUDO_USER")
-		if userHome == "" {
-			userHome = os.Getenv("USER")
+		user := os.Getenv("SUDO_USER")
+		if user == "" {
+			user = os.Getenv("USER")
 		}
-		homeDir := "/home/" + userHome
+		userHome := "/home/" + user
 
-		// construct full command for the boot script
-		fullPath := homeDir + "/go-spoof/src/goSpoof"
-		fullCmd := fullPath + " " + strings.Join(args, " ") + " >> /var/log/gospoof_boot.log 2>&1\n"
+		execPath := userHome + "/go-spoof/src/goSpoof"
+		sigFile := userHome + "/go-spoof/tools/portspoof_signatures"
 
-		// write the boot script to /etc
-		err := os.WriteFile("/etc/goSpoofBoot.sh", []byte("#!/bin/bash\n"+fullCmd), 0755)
-		if err != nil {
-			log.Fatalf("[-] Failed to write boot script: %v", err)
-		}
-
-		// create a cron job to run the boot script on startup
-		cronLine := "@reboot sleep 30 && /etc/goSpoofBoot.sh\n"
-		cmd := exec.Command("crontab", "-l")
-		existingCron, _ := cmd.Output()
-		if err != nil {
-			existingCron = []byte{}
-		}
-
-		if !strings.Contains(string(existingCron), "/etc/goSpoofBoot.sh") {
-			cmd := exec.Command("bash", "-c", fmt.Sprintf("(crontab -l 2>/dev/null; echo \"%s\") | crontab -", strings.TrimSpace(cronLine)))
-			err := cmd.Run()
-			if err != nil {
-				log.Fatalf("[-] Failed to register cron job: %v", err)
+		// replace ../tools/... with absolute
+		for i, arg := range args {
+			if strings.Contains(arg, "../tools/portspoof_signatures") {
+				args[i] = strings.Replace(arg, "../tools/portspoof_signatures", sigFile, 1)
 			}
-			log.Println("[+] Boot persistence enabled with cron job.")
-		} else {
-			log.Println("[=] Cron job already exists. Skipping.")
 		}
+
+		fullCmd := execPath + " " + strings.Join(args, " ")
+		serviceName := "gospoof.service"
+
+		user = os.Getenv("SUDO_USER")
+		if user == "" {
+			user = os.Getenv("USER")
+		}
+
+		unit := fmt.Sprintf(`[Unit]
+        Description=GoSpoof Startup Service
+        After=network.target
+
+        [Service]
+        ExecStart=%s
+        Restart=always
+        User=%s
+
+        [Install]
+        WantedBy=multi-user.target
+        `, fullCmd, user)
+
+		err = os.WriteFile("/etc/systemd/system/"+serviceName, []byte(unit), 0644)
+		if err != nil {
+			log.Fatalf("[-] Failed to write systemd service file: %v", err)
+		}
+
+		exec.Command("systemctl", "daemon-reexec").Run()
+		exec.Command("systemctl", "daemon-reload").Run()
+		exec.Command("systemctl", "enable", serviceName).Run()
+
+		log.Println("[+] Systemd service created and enabled.")
 	}
 
 	if *config.ThrottleLevel != "0" {
