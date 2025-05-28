@@ -157,7 +157,7 @@ func processArgs(config Config) Config {
         After=network.target
 
         [Service]
-        ExecStart="%s" 
+        ExecStart=%s 
         Restart=always
         User=%s
 
