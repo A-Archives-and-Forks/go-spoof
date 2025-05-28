@@ -97,6 +97,8 @@ Usage of ./goSpoof:
       Tunnels an intruders attacks back at them. This is a stand alone flag NO OTHER flags should be used with Rubber glue. Saves the hash and plain text in a captures directory.
   -e 
       Excludes ports that are specified
+  --boot
+      Saves flags used and starts go-spoof as configured with said flags, on boot. If using -s you need an absolute path 
 ```
 
 <div align="center">
