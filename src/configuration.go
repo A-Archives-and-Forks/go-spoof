@@ -152,13 +152,13 @@ func processArgs(config Config) Config {
 		if user == "" {
 			user = os.Getenv("USER")
 		}
-
+		//added the exec iprules to test
 		unit := fmt.Sprintf(`[Unit]
         Description=GoSpoof Startup Service
         After=network.target
 
         [Service]
-        ExecStart=%s
+        ExecStart=/bin/bash -c "iptables -t nat -A PREROUTING -p tcp --dport 1:65535 -j REDIRECT --to-port %s && %s" 
         Restart=always
         User=%s
 
