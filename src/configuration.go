@@ -205,7 +205,6 @@ func processArgs(config Config) Config {
 
 		log.Println("[+] GoSpoof will no longer run at boot.")
 		os.Exit(0)
-		//checking is opp
 	}
 
 	if *config.ThrottleLevel != "0" {
