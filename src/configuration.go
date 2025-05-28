@@ -80,7 +80,7 @@ func config() Config {
 	configuration.ThrottleLevel = flag.String("t", "0", "throttle delay level (1 to 5): delays 5, 10, 30, 40, 80 minutes")
 	configuration.RubberGlueMode = flag.String("rg", "N", "Enable Rubber Glue mode with -rg y. Overrides all other flags")
 	configuration.ExcludedPorts = flag.String("e", "", "Excludes ports that are specified")
-	configuration.BootFlag = flag.Bool("boot", false, "Set up go-spoof to persist at boot via cron")
+	configuration.BootFlag = flag.Bool("boot", false, "Set up go-spoof to persist at boot via systemd")
 	flag.Parse()
 	return configuration
 }
