@@ -19,6 +19,9 @@
   <h4>
     <a target="_blank" href="https://www.blackhillsinfosec.com/go-spoof-a-tool-for-cyber-deception/" rel="dofollow"><strong>Blog Post</strong></a>
   </h4>
+  <h4>
+  <a tartget="_blank" href="https://gospoof.github.io/" rel="dofollow"><strong>Docs<strong></a>
+  </h4>
 </div>
 <hr>
 
