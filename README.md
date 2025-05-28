@@ -15,9 +15,11 @@
 <h4><code>GoSpoof</code> is a push torwards bringing cyber deceptive tooling back into your defensive toolkit. This tool was directly inspired by the tool portspoof.</h4>
 </p>
 
-<div style="text-align: center;">
+<div align="center">
   <h4>
     <a target="_blank" href="https://www.blackhillsinfosec.com/go-spoof-a-tool-for-cyber-deception/" rel="dofollow"><strong>Blog Post</strong></a>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <a target="_blank" href="https://gospoof.github.io/" rel="dofollow"><strong>Docs</strong></a>
   </h4>
 </div>
 <hr>
