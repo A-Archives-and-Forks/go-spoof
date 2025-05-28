@@ -51,6 +51,7 @@ type Config struct {
 	RubberGlueMode        *string
 	ExcludedPorts         *string
 	BootFlag              *bool
+	RemoveBoot            *bool
 }
 
 func config() Config {
@@ -81,6 +82,7 @@ func config() Config {
 	configuration.RubberGlueMode = flag.String("rg", "N", "Enable Rubber Glue mode with -rg y. Overrides all other flags")
 	configuration.ExcludedPorts = flag.String("e", "", "Excludes ports that are specified")
 	configuration.BootFlag = flag.Bool("boot", false, "Set up go-spoof to persist at boot via systemd")
+	configuration.RemoveBoot = flag.Bool("rm", false, "Removes and presets saved with --boot to start new")
 	flag.Parse()
 	return configuration
 }
@@ -174,6 +176,36 @@ func processArgs(config Config) Config {
 		exec.Command("systemctl", "enable", serviceName).Run()
 
 		log.Println("[+] Systemd service created and enabled.")
+	}
+	if *config.RemoveBoot {
+		serviceName := "gospoof.service"
+		unitPath := "/etc/systemd/system/" + serviceName
+
+		log.Println("[*] Removing GoSpoof systemd boot persistence...")
+
+		// stoppes and disables service
+		exec.Command("systemctl", "stop", serviceName).Run()
+		exec.Command("systemctl", "disable", serviceName).Run()
+
+		// delete the service file
+		if _, err := os.Stat(unitPath); err == nil {
+			err := os.Remove(unitPath)
+			if err != nil {
+				log.Printf("[-] Failed to remove systemd service file: %v", err)
+			} else {
+				log.Println("[+] Deleted:", unitPath)
+			}
+		} else {
+			log.Println("[*] Service file not found. Nothing to delete.")
+		}
+
+		// sys clean up
+		exec.Command("systemctl", "daemon-reexec").Run()
+		exec.Command("systemctl", "daemon-reload").Run()
+
+		log.Println("[+] GoSpoof will no longer run at boot.")
+		os.Exit(0)
+		//checking is opp
 	}
 
 	if *config.ThrottleLevel != "0" {
