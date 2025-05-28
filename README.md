@@ -16,16 +16,11 @@
 </p>
 
 <div align="center">
-  <table style="border: none;">
-    <tr>
-      <td align="center" style="border: none;">
-        <h4><a target="_blank" href="https://www.blackhillsinfosec.com/go-spoof-a-tool-for-cyber-deception/" rel="dofollow"><strong>Blog Post</strong></a></h4>
-      </td>
-      <td align="center" style="border: none;">
-        <h4><a target="_blank" href="https://gospoof.github.io/" rel="dofollow"><strong>Docs</strong></a></h4>
-      </td>
-    </tr>
-  </table>
+  <h4>
+    <a target="_blank" href="https://www.blackhillsinfosec.com/go-spoof-a-tool-for-cyber-deception/" rel="dofollow"><strong>Blog Post</strong></a>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <a target="_blank" href="https://gospoof.github.io/" rel="dofollow"><strong>Docs</strong></a>
+  </h4>
 </div>
 <hr>
 
