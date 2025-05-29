@@ -157,8 +157,8 @@ func processArgs(config Config) Config {
         After=network.target
 
         [Service]
-		ExecStartPre=/usr/bin/echo "Running GoSpoof as $(whoami) at $(date)" >> /tmp/gospoof.log
-        ExecStart=%s 
+		ExecStartPre=/bin/bash -c '/usr/sbin/iptables -t nat -C PREROUTING -p tcp -m tcp --dport 1:65535 -j REDIRECT --to-ports 4444 || /usr/sbin/iptables -t nat -A PREROUTING -p tcp -m tcp --dport 1:65535 -j REDIRECT --to-ports 4444'
+		ExecStart=%s 
 		WorkingDirectory=/home/kali/GoSpoof/src
         Restart=always
         User=%s
@@ -167,6 +167,10 @@ func processArgs(config Config) Config {
         [Install]
         WantedBy=multi-user.target
         `, fullCmd, user)
+
+		if os.Geteuid() != 0 {
+			log.Fatalln("[-] Must run as root to write systemd service file.")
+		}
 
 		err = os.WriteFile("/etc/systemd/system/"+serviceName, []byte(unit), 0644)
 		if err != nil {
