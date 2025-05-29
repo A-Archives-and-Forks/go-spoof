@@ -157,9 +157,12 @@ func processArgs(config Config) Config {
         After=network.target
 
         [Service]
+		ExecStartPre=/usr/bin/echo "Running GoSpoof as $(whoami) at $(date)" >> /tmp/gospoof.log
         ExecStart=%s 
+		WorkingDirectory=/home/kali/GoSpoof/src
         Restart=always
         User=%s
+		Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
         [Install]
         WantedBy=multi-user.target
