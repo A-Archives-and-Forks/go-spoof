@@ -164,7 +164,8 @@ func processArgs(config Config) Config {
         After=network.target
 
         [Service]
-		ExecStartPre=/bin/bash -c "/usr/sbin/iptables -t nat -C PREROUTING -p tcp -m tcp --dport 1:65535 -j REDIRECT --to-ports 4444 || /usr/sbin/iptables -t nat -A PREROUTING -p tcp -m tcp --dport 1:65535 -j REDIRECT --to-ports 4444"		ExecStart=%s 
+		ExecStartPre=/bin/bash -c "/usr/sbin/iptables -t nat -C PREROUTING -p tcp -m tcp --dport 1:65535 -j REDIRECT --to-ports 4444 || /usr/sbin/iptables -t nat -A PREROUTING -p tcp -m tcp --dport 1:65535 -j REDIRECT --to-ports 4444"		
+		ExecStart=%s 
 		WorkingDirectory=/home/kali/GoSpoof/src
         Restart=always
         User=root
