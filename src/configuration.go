@@ -21,6 +21,7 @@ import (
 	"net"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"regexp/syntax"
 	"strconv"
 	"strings"
@@ -133,18 +134,24 @@ func processArgs(config Config) Config {
 		if user == "" {
 			user = os.Getenv("USER")
 		}
-		userHome := "/home/" + user
 
-		execPath := userHome + "/go-spoof/src/goSpoof"
-		sigFile := userHome + "/go-spoof/tools/portspoof_signatures"
-
-		// replace ../tools/... with absolute
+		execPath, err := filepath.EvalSymlinks("/proc/self/exe") //added to see if this fixes the script
+		if err != nil {
+			log.Fatalf("[-] Failed to get executable path: %v", err)
+		}
+		// Convert signature file path (-s) to absolute if it's relative
 		for i, arg := range args {
-			if strings.Contains(arg, "../tools/portspoof_signatures") {
-				args[i] = strings.Replace(arg, "../tools/portspoof_signatures", sigFile, 1)
+			if i > 0 && args[i-1] == "-s" && !filepath.IsAbs(arg) {
+				absSigPath, err := filepath.Abs(arg)
+				if err != nil {
+					log.Fatalf("[-] Failed to resolve absolute path for signature file: %v", err)
+				}
+				if _, err := os.Stat(absSigPath); os.IsNotExist(err) {
+					log.Fatalf("[-] Signature file does not exist: %s", absSigPath)
+				}
+				args[i] = absSigPath
 			}
 		}
-
 		fullCmd := execPath + " " + strings.Join(args, " ")
 		serviceName := "gospoof.service"
 
@@ -157,16 +164,15 @@ func processArgs(config Config) Config {
         After=network.target
 
         [Service]
-		ExecStartPre=/bin/bash -c '/usr/sbin/iptables -t nat -C PREROUTING -p tcp -m tcp --dport 1:65535 -j REDIRECT --to-ports 4444 || /usr/sbin/iptables -t nat -A PREROUTING -p tcp -m tcp --dport 1:65535 -j REDIRECT --to-ports 4444'
-		ExecStart=%s 
+		ExecStartPre=/bin/bash -c "/usr/sbin/iptables -t nat -C PREROUTING -p tcp -m tcp --dport 1:65535 -j REDIRECT --to-ports 4444 || /usr/sbin/iptables -t nat -A PREROUTING -p tcp -m tcp --dport 1:65535 -j REDIRECT --to-ports 4444"		ExecStart=%s 
 		WorkingDirectory=/home/kali/GoSpoof/src
         Restart=always
-        User=%s
+        User=root
 		Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
         [Install]
         WantedBy=multi-user.target
-        `, fullCmd, user)
+        `, fullCmd)
 
 		if os.Geteuid() != 0 {
 			log.Fatalln("[-] Must run as root to write systemd service file.")
