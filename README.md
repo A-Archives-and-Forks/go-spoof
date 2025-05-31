@@ -98,7 +98,9 @@ Usage of ./goSpoof:
   -e 
       Excludes ports that are specified
   --boot
-      Saves flags used and starts go-spoof as configured with said flags, on boot. If using -s you need an absolute path 
+      Saves flags used and starts go-spoof as configured with said flags, on boot.
+  -rm
+      Removes all flags used on boot as well as the saved config file and deletes the gospoof.service. A complete fresh start
 ```
 
 <div align="center">
