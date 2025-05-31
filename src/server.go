@@ -12,7 +12,9 @@ import (
 	"log"
 	"net"
 	"os"
+	"os/exec"
 	"os/signal"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -159,7 +161,7 @@ func (s *server) handleConnection(conn net.Conn, config Config) {
 			requestData,
 		)
 
-		fmt.Print(logEntry)
+		fmt.Printf("Scanned at %s by %s\n", timestamp, remoteAddr)
 
 		// save to honeypot.log
 		file, err := os.OpenFile("honeypot.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
@@ -249,6 +251,18 @@ func startServer(config Config) {
 		runRubberGlue(config) //rg server func
 		return
 	}
+	if *config.ExcludedPorts != "" {
+		portStr := *config.Port
+		excluded := parseExcludedPorts(*config.ExcludedPorts)
+		log.Printf("[+] Excluding ports: %v\n", excluded)
+		inclusiveRanges := generateInclusiveRanges(excluded)
+
+		for _, r := range inclusiveRanges {
+			exec.Command("iptables", "-t", "nat", "-A", "PREROUTING",
+				"-p", "tcp", "--dport", r, "-j", "REDIRECT", "--to-port", portStr).Run()
+		}
+	}
+
 	//need to pass the port we want to host the server on
 
 	log.Println("starting server at " + *config.IP + ":" + *config.Port)
@@ -268,4 +282,33 @@ func startServer(config Config) {
 	fmt.Println("Shutting down server...")
 	s.Stop()
 	fmt.Println("Server stopped.")
+}
+func parseExcludedPorts(input string) []int {
+	parts := strings.Split(input, ",")
+	var ports []int
+	for _, part := range parts {
+		port, err := strconv.Atoi(strings.TrimSpace(part))
+		if err == nil && port >= 1 && port <= 65535 {
+			ports = append(ports, port)
+		}
+	}
+	return ports
+}
+func generateInclusiveRanges(excluded []int) []string {
+	sort.Ints(excluded)
+	var ranges []string
+
+	prev := 1
+	for _, ex := range excluded {
+		if prev < ex {
+			ranges = append(ranges, fmt.Sprintf("%d:%d", prev, ex-1))
+		}
+		prev = ex + 1
+	}
+
+	if prev <= 65535 {
+		ranges = append(ranges, fmt.Sprintf("%d:65535", prev))
+	}
+
+	return ranges
 }

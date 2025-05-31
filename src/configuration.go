@@ -15,11 +15,13 @@ package main
 import (
 	"bufio"
 	"flag"
+	"fmt"
 	"log"
 	"math/rand"
 	"net"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"regexp/syntax"
 	"strconv"
 	"strings"
@@ -48,6 +50,9 @@ type Config struct {
 	HoneypotMode          *string
 	ThrottleLevel         *string
 	RubberGlueMode        *string
+	ExcludedPorts         *string
+	BootFlag              *bool
+	RemoveBoot            *bool
 }
 
 func config() Config {
@@ -76,6 +81,9 @@ func config() Config {
 	configuration.HoneypotMode = flag.String("honey", "N", "Enable honeypot mode to log the attackers info (Y/N)")
 	configuration.ThrottleLevel = flag.String("t", "0", "throttle delay level (1 to 5): delays 5, 10, 30, 40, 80 minutes")
 	configuration.RubberGlueMode = flag.String("rg", "N", "Enable Rubber Glue mode with -rg y. Overrides all other flags")
+	configuration.ExcludedPorts = flag.String("e", "", "Excludes ports that are specified")
+	configuration.BootFlag = flag.Bool("boot", false, "Set up go-spoof to persist at boot via systemd")
+	configuration.RemoveBoot = flag.Bool("rm", false, "Removes and presets saved with --boot to start new")
 	flag.Parse()
 	return configuration
 }
@@ -113,6 +121,104 @@ func processArgs(config Config) Config {
 	var err error
 	var intPortArray []int
 	isList := false
+
+	if *config.BootFlag {
+		args := []string{}
+		for _, arg := range os.Args[1:] {
+			if arg != "--boot" {
+				args = append(args, arg)
+			}
+		}
+
+		user := os.Getenv("SUDO_USER")
+		if user == "" {
+			user = os.Getenv("USER")
+		}
+
+		execPath, err := filepath.EvalSymlinks("/proc/self/exe") //added to see if this fixes the script
+		if err != nil {
+			log.Fatalf("[-] Failed to get executable path: %v", err)
+		}
+		// Convert signature file path (-s) to absolute if it's relative
+		for i, arg := range args {
+			if i > 0 && args[i-1] == "-s" && !filepath.IsAbs(arg) {
+				absSigPath, err := filepath.Abs(arg)
+				if err != nil {
+					log.Fatalf("[-] Failed to resolve absolute path for signature file: %v", err)
+				}
+				if _, err := os.Stat(absSigPath); os.IsNotExist(err) {
+					log.Fatalf("[-] Signature file does not exist: %s", absSigPath)
+				}
+				args[i] = absSigPath
+			}
+		}
+		fullCmd := execPath + " " + strings.Join(args, " ")
+		serviceName := "gospoof.service"
+
+		user = os.Getenv("SUDO_USER")
+		if user == "" {
+			user = os.Getenv("USER")
+		}
+		unit := fmt.Sprintf(`[Unit]
+        Description=GoSpoof Startup Service
+        After=network.target
+
+        [Service]
+		ExecStartPre=/bin/bash -c "/usr/sbin/iptables -t nat -C PREROUTING -p tcp -m tcp --dport 1:65535 -j REDIRECT --to-ports 4444 || /usr/sbin/iptables -t nat -A PREROUTING -p tcp -m tcp --dport 1:65535 -j REDIRECT --to-ports 4444"		
+		ExecStart=%s 
+		WorkingDirectory=/home/kali/GoSpoof/src
+        Restart=always
+        User=root
+		Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+        [Install]
+        WantedBy=multi-user.target
+        `, fullCmd)
+
+		if os.Geteuid() != 0 {
+			log.Fatalln("[-] Must run as root to write systemd service file.")
+		}
+
+		err = os.WriteFile("/etc/systemd/system/"+serviceName, []byte(unit), 0644)
+		if err != nil {
+			log.Fatalf("[-] Failed to write systemd service file: %v", err)
+		}
+
+		exec.Command("systemctl", "daemon-reexec").Run()
+		exec.Command("systemctl", "daemon-reload").Run()
+		exec.Command("systemctl", "enable", serviceName).Run()
+
+		log.Println("[+] Systemd service created and enabled.")
+	}
+	if *config.RemoveBoot {
+		serviceName := "gospoof.service"
+		unitPath := "/etc/systemd/system/" + serviceName
+
+		log.Println("[*] Removing GoSpoof systemd boot persistence...")
+
+		// stoppes and disables service
+		exec.Command("systemctl", "stop", serviceName).Run()
+		exec.Command("systemctl", "disable", serviceName).Run()
+
+		// delete the service file
+		if _, err := os.Stat(unitPath); err == nil {
+			err := os.Remove(unitPath)
+			if err != nil {
+				log.Printf("[-] Failed to remove systemd service file: %v", err)
+			} else {
+				log.Println("[+] Deleted:", unitPath)
+			}
+		} else {
+			log.Println("[*] Service file not found. Nothing to delete.")
+		}
+
+		// sys clean up
+		exec.Command("systemctl", "daemon-reexec").Run()
+		exec.Command("systemctl", "daemon-reload").Run()
+
+		log.Println("[+] GoSpoof will no longer run at boot.")
+		os.Exit(0)
+	}
 
 	if *config.ThrottleLevel != "0" {
 		level, err := strconv.Atoi(*config.ThrottleLevel)
