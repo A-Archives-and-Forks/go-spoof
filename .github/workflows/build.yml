@@ -19,6 +19,6 @@ jobs:
 
       - name: Build GoSpoof binary
         run: |
-          cd GoSpoof/src
+          cd src
           go mod tidy
           go build -v -o goSpoof
