@@ -1,0 +1,24 @@
+name: Build GoSpoof on Push to Main
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Build GoSpoof binary
+        run: |
+          cd GoSpoof/src
+          go mod tidy
+          go build -v -o goSpoof
