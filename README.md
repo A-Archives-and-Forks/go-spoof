@@ -38,6 +38,11 @@ Run either of the following commands to setup the iptables rule to redirect to p
 ```bash
 sudo iptables -t nat -A PREROUTING -p tcp -m tcp --dport 1:65535 -j REDIRECT --to-ports 4444
 ```
+Run the WebUI start up script
+
+```bash
+go run startup.go
+```
 
 After running, cd into the src directory.
 
@@ -103,6 +108,8 @@ Usage of ./goSpoof:
       Saves flags used and starts go-spoof as configured with said flags, on boot.
   -rm
       Removes all flags used on boot as well as the saved config file and deletes the gospoof.service. A complete fresh start
+  --WebUI
+      This launches the GoSpoof Command Center. To run the website without the entire GoSpoof tool running, simply cd .. then cd Web/Server then do node server.js. Open up a browser of your choice and go to http://localhost:3000
 ```
 
 <div align="center">

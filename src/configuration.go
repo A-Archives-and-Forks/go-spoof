@@ -23,6 +23,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp/syntax"
+	"runtime"
 	"strconv"
 	"strings"
 	"sync"
@@ -53,6 +54,7 @@ type Config struct {
 	ExcludedPorts         *string
 	BootFlag              *bool
 	RemoveBoot            *bool
+	WebUI                 *bool
 }
 
 func config() Config {
@@ -84,6 +86,7 @@ func config() Config {
 	configuration.ExcludedPorts = flag.String("e", "", "Excludes ports that are specified")
 	configuration.BootFlag = flag.Bool("boot", false, "Set up go-spoof to persist at boot via systemd")
 	configuration.RemoveBoot = flag.Bool("rm", false, "Removes and presets saved with --boot to start new")
+	configuration.WebUI = flag.Bool("WebUI", false, "Launches WebUI for GoSpoof")
 	flag.Parse()
 	return configuration
 }
@@ -106,6 +109,9 @@ func getIP() string {
 }
 
 func processArgs(config Config) Config {
+	if *config.WebUI {
+		go launchWebUI()
+	}
 	//rubber glue implimentation
 	if *config.RubberGlueMode == "Y" || *config.RubberGlueMode == "y" {
 		if *config.Port != "4444" || *config.SpoofPorts != "1-65535" || *config.HoneypotMode == "Y" || *config.ThrottleLevel != "0" {
@@ -421,6 +427,29 @@ func processArgs(config Config) Config {
 
 	//config = processSignatureFile(config, minPort, maxPort, intPortArray, isList) //read signatures from configuration file
 	return config
+}
+
+func launchWebUI() {
+	// Launch server
+	cmd := exec.Command("node", "../Web/Server/server.js")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Start(); err != nil {
+		log.Fatalf("Failed to launch Web UI: %v", err)
+	}
+
+	// Open in default browser
+	url := "http://localhost:3000"
+	switch runtime.GOOS {
+	case "windows":
+		exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start()
+	case "linux":
+		exec.Command("xdg-open", url).Start()
+	case "darwin":
+		exec.Command("open", url).Start()
+	}
+
+	log.Println("🌐 Web UI launched on", url)
 }
 
 // Processes the signature file and returns a map of port:signature

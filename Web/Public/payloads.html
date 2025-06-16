@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Payloads</title>
+  <link rel="stylesheet" href="CSS/styling.css" />
+</head>
+<body>
+  <nav>
+    <ul>
+      <li><a href="/">Home</a></li>
+      <li><a href="/attackers">Attackers</a></li>
+      <li><a href="/payloads">Payloads</a></li>
+    </ul>
+  </nav>
+
+  <main>
+    <h1>Captured Payloads</h1>
+    <div class="filter-bar" style="margin: 20px 0; display: flex; flex-wrap: wrap; gap: 10px;">
+     <input 
+     type="text"
+     id="globalFilter"
+     placeholder="Search IP, Date, Time, Payload..."
+     style="width: 100%; padding: 10px; margin-bottom: 20px; border-radius: 5px; border: 1px solid #ccc;"
+     > 
+     <label>
+    <input type="checkbox" id="exactMatchCheckbox" />
+    Exact Match
+    </label>
+    </div>
+
+    <table border="1" cellpadding="8">
+      <thead>
+        <tr><th>IP</th><th>Date</th><th>Time</th><th>Payload</th></tr>
+      </thead>
+      <tbody id="payloadTable"></tbody>
+    </table>
+  </main>
+
+  <script>
+   fetch('/api/payloads')
+  .then(res => res.json())
+  .then(data => {
+    const exactMatchCheckbox = document.getElementById('exactMatchCheckbox');
+    const table = document.getElementById('payloadTable');
+    const searchInput = document.getElementById('globalFilter');
+    const originalData = data;
+
+    function renderTable(filteredData) {
+      table.innerHTML = '';
+      filteredData.forEach(entry => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${entry.ip}</td>
+          <td>${entry.date}</td>
+          <td>${entry.time}</td>
+          <td>${entry.payload}</td>
+        `;
+        table.appendChild(row);
+      });
+    }
+
+function applyFilter() {
+  const searchTerm = searchInput.value.toLowerCase().trim();
+  const exactMatch = exactMatchCheckbox.checked;
+
+  const filtered = originalData.filter(entry => {
+    const fields = [
+      entry.ip?.toLowerCase(),
+      entry.date,
+      entry.time,
+      entry.payload?.toLowerCase()
+    ];
+
+    return fields.some(field => {
+      if (!field) return false;
+      return exactMatch ? field === searchTerm : field.includes(searchTerm);
+    });
+  });
+
+  renderTable(filtered);
+}
+
+
+    searchInput.addEventListener('input', applyFilter);
+    renderTable(originalData);
+  });
+
+    // Fade-out nav transition
+    document.querySelectorAll("a").forEach(link => {
+      link.addEventListener("click", function (e) {
+        e.preventDefault();
+        const href = this.getAttribute("href");
+        document.body.classList.add("fade-out");
+        setTimeout(() => {
+          window.location.href = href;
+        }, 300);
+      });
+    });
+  </script>
+</body>
+</html>
