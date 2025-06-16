@@ -36,6 +36,11 @@ Run either of the following commands to setup the iptables rule to redirect to p
 ```bash
 sudo iptables -t nat -A PREROUTING -p tcp -m tcp --dport 1:65535 -j REDIRECT --to-ports 4444
 ```
+Run the WebUI start up script
+
+```bash
+go run startup.go
+```
 
 After running, cd into the src directory.
 
@@ -47,11 +52,6 @@ The executable "goSpoof" should already exist in the directory - if not, rebuild
 
 ```bash
 go build -o goSpoof
-```
-After this, cd back a directory and run the WebUI start up script
-
-```bash
-go run startup.go
 ```
 
 Run the executable
