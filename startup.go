@@ -27,7 +27,7 @@ func main() {
 	}
 
 	// 3. Navigate to Web/Server
-	serverDir := "/Web/Server"
+	serverDir := "Web/Server"
 	if _, err := os.Stat(serverDir); os.IsNotExist(err) {
 		log.Fatalf("Web/Server directory not found at %s", serverDir)
 	}
