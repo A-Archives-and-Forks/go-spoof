@@ -47,6 +47,7 @@ The executable "goSpoof" should already exist in the directory - if not, rebuild
 
 ```bash
 go build -o goSpoof
+go run startup.go
 ```
 
 Run the executable
@@ -101,6 +102,8 @@ Usage of ./goSpoof:
       Saves flags used and starts go-spoof as configured with said flags, on boot.
   -rm
       Removes all flags used on boot as well as the saved config file and deletes the gospoof.service. A complete fresh start
+  --WebUI
+      This launches the GoSpoof Command Center
 ```
 
 <div align="center">
