@@ -47,6 +47,10 @@ The executable "goSpoof" should already exist in the directory - if not, rebuild
 
 ```bash
 go build -o goSpoof
+```
+After this, cd back a directory and run the WebUI start up script
+
+```bash
 go run startup.go
 ```
 
