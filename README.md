@@ -107,7 +107,7 @@ Usage of ./goSpoof:
   -rm
       Removes all flags used on boot as well as the saved config file and deletes the gospoof.service. A complete fresh start
   --WebUI
-      This launches the GoSpoof Command Center
+      This launches the GoSpoof Command Center. To run the website without the entire GoSpoof tool running, simply cd .. then cd Web/Server then do node server.js. Open up a browser of your choice and go to http://localhost:3000
 ```
 
 <div align="center">
