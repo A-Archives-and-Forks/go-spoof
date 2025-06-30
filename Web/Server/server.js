@@ -1,4 +1,5 @@
 const express = require('express');
+const expressEjsLayouts = require('express-ejs-layouts');
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
 const path = require('path');
@@ -7,20 +8,36 @@ const logDest = path.join(__dirname, '..', 'honeypot.log');
 
 const app = express();
 
+// Set EJS as the view engine
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, '..', 'Public', 'views'));
+
+// Use express-ejs-layouts
+app.use(expressEjsLayouts);
+app.set('layout', 'layout');
+
 // Serve static files from the actual Public directory
 app.use(express.static(path.join(__dirname, '..', 'Public')));
 
+
 // Routes
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'Public', 'index.html'));
+  res.render('index',{
+    title: 'GoSpoof - Home',
+  });
 });
 
 app.get('/attackers', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'Public', 'Attackers.html'));
+  res.render('attackers', {
+    title: 'GoSpoof - Attackers',
+    includeChartJS: true
+  });
 });
 
 app.get('/payloads', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'Public', 'payloads.html'));
+  res.render('payloads', {
+    title: 'GoSpoof - Payloads',
+  });
 });
 
 const logPath = path.join(__dirname, '..', 'honeypot.log');
