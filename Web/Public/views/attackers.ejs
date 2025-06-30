@@ -1,47 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Attackers</title>
-  <link rel="stylesheet" href="CSS/styling.css" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
-<body>
-  <nav>
-    <ul>
-      <li><a href="/">Home</a></li>
-      <li><a href="/attackers">Attackers</a></li>
-      <li><a href="/payloads">Payloads</a></li>
-    </ul>
-  </nav>
+<h1>Logged Attackers</h1>
+<table border="1" cellpadding="8">
+  <thead>
+     <tr><th>IP</th><th>Unique Payloads Sent</th></tr>
+  </thead>
+  <tbody id="attackerTable"></tbody>
+</table>
+<h2>Attacker Distribution</h2>
+<div style="max-width: 400px; margin: 40px auto;">
+  <canvas id="ipPieChart"></canvas>
+</div>
 
-  <main>
-    <h1>Logged Attackers</h1>
-    <table border="1" cellpadding="8">
-      <thead>
-         <tr><th>IP</th><th>Unique Payloads Sent</th></tr>
-      </thead>
-      <tbody id="attackerTable"></tbody>
-    </table>
-    <h2>Attacker Distribution</h2>
-    <div style="max-width: 400px; margin: 40px auto;">
-      <canvas id="ipPieChart"></canvas>
-    </div>
-
-
-  </main>
 <script>
-   document.querySelectorAll("a").forEach(link => {
-    link.addEventListener("click", function (e) {
-      e.preventDefault();
-      const href = this.getAttribute("href");
-      document.body.classList.add("fade-out");
-      setTimeout(() => {
-        window.location.href = href;
-      }, 300);
-    });
-  });
-
   // Fetch attacker data
   fetch('/api/attackers')
     .then(res => res.json())
@@ -87,12 +56,11 @@
                 labels: {
                   color: '#fff',
                   font: { size: 14 }
+                }
+              }
+            }
           }
         }
-      }
-    }
-  });
-});
+      );
+    });
 </script>
-</body>
-</html>
