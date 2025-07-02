@@ -1,9 +1,22 @@
 const express = require('express');
 const expressEjsLayouts = require('express-ejs-layouts');
 const multer = require('multer');
-const upload = multer({ dest: 'uploads/' });
 const path = require('path');
 const fs = require('fs');
+const uploadFolder = path.join(__dirname, 'uploads');
+fs.mkdirSync(uploadFolder, { recursive: true });
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, uploadFolder); // Store in Server/uploads
+  },
+  filename: function (req, file, cb) {
+    const timestamp = Date.now();
+    cb(null, `${timestamp}-${file.originalname}`);
+  }
+});
+
+const upload = multer({ storage });
 const logDest = path.join(__dirname, '..', 'honeypot.log');
 
 const app = express();
@@ -91,17 +104,13 @@ app.get('/api/payloads', (req, res) => {
 });
 
 app.post('/upload-log', upload.single('logFile'), (req, res) => {
-  const tempPath = req.file.path;
+  if (!req.file) {
+    return res.status(400).send('No file uploaded.');
+  }
 
-  // Replace the existing honeypot.log file with uploaded one
-  fs.rename(tempPath, logDest, err => {
-    if (err) {
-      console.error(err);
-      return res.status(500).send('Failed to save log.');
-    }
-    res.send('✅ honeypot.log uploaded successfully!');
-  });
+  res.send(`✅ Uploaded as ${req.file.filename} in /Server/uploads`);
 });
+
 
 
 
