@@ -5,23 +5,34 @@
   <h2>Upload <code>honeypot.log</code></h2>
   <form id="logForm" enctype="multipart/form-data">
     <input type="file" name="logFile" accept=".log" required />
-    <button type="submit">Add Honeypot.log</button>
   </form>
   <p id="uploadStatus"></p>
 </div>
 
 <script>
   // File upload
-  document.getElementById("logForm").addEventListener("submit", async function (e) {
-    e.preventDefault();
-    const form = new FormData(this);
+  const fileInput = document.querySelector('input[name="logFile"]');
+  const form = document.getElementById("logForm");
+  const status = document.getElementById("uploadStatus");
 
-    const res = await fetch("/upload-log", {
-      method: "POST",
-      body: form,
-    });
+  fileInput.addEventListener("change", async function () {
+    if (fileInput.files.length === 0) return;
 
-    const message = await res.text();
-    document.getElementById("uploadStatus").textContent = message;
+    const formData = new FormData(form);
+
+    try {
+      const res = await fetch("/upload-log", {
+        method: "POST",
+        body: formData,
+      });
+
+      const message = await res.text();
+      status.textContent = message;
+    } catch (err) {
+      status.textContent = "Upload failed.";
+    }
   });
+
+  // Disable default form submission
+  form.addEventListener("submit", (e) => e.preventDefault());
 </script>
