@@ -26,8 +26,13 @@
         body: formData,
       });
 
-      const message = await res.text();
-      status.textContent = message;
+      if (res.redirected) {
+        window.location.href = res.url;
+      } else {
+        const message = await res.text();
+        status.textContent = message;
+      }
+
     } catch (err) {
       status.textContent = "Upload failed.";
     }

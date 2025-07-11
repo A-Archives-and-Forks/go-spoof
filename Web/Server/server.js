@@ -107,8 +107,15 @@ app.post('/upload-log', upload.single('logFile'), (req, res) => {
   if (!req.file) {
     return res.status(400).send('No file uploaded.');
   }
+   const uploadedPath = req.file.path;
 
-  res.send(`✅ Uploaded as ${req.file.filename} in /Server/uploads`);
+  fs.rename(uploadedPath, logPath, (err) => {
+  if (err) {
+    console.error(err);
+    return res.status(500).send('Failed to move uploaded file.');
+  }
+  res.redirect('/attackers'); // redirect to attackers page after upload
+});
 });
 
 
