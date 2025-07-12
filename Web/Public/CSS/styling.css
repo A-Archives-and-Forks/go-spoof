@@ -84,3 +84,126 @@ h1 {
   background: #111;
   color: #fff;
 }
+.payload-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 30px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  overflow: hidden;
+  animation: fadeIn 0.6s ease;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.payload-table th {
+  background-color: #111;
+  color: #00ffe0;
+  font-size: 1.3rem;
+  text-align: left;
+  padding: 16px;
+  border-bottom: 2px solid #00ffe0;
+}
+
+.payload-table td {
+  padding: 14px 20px;
+  border-bottom: 1px solid #333;
+  color: #e0e0e0;
+  text-align: left;
+  font-size: 1rem;
+}
+
+.ip-toggle-row {
+  cursor: pointer;
+  background-color: rgba(255, 255, 255, 0.05);
+  font-weight: bold;
+  transition: background-color 0.2s ease;
+}
+
+.ip-toggle-row:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.payload-detail.show {
+  opacity: 1;
+  max-height: 500px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+
+span[style*="float:right"] {
+  font-weight: bold;
+  color: #ffae42;
+}
+#payloadContainer {
+  margin-top: 2rem;
+}
+
+.ip-toggle-group {
+  background: rgba(255, 255, 255, 0.03);
+  margin-bottom: 16px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  animation: fadeIn 0.4s ease-in;
+}
+
+.ip-header {
+  padding: 20px;
+  cursor: pointer;
+  background-color: #111;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #00ffe0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #00ffe055;
+}
+
+.ip-header:hover {
+  background-color: #1a1a1a;
+}
+
+.payload-items {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.35s ease;
+}
+.icon {
+  display: inline-block;
+  width: 1rem;
+  margin-right: 10px;
+  transform: rotate(0deg);
+  transition: transform 0.3s ease;
+}
+
+.icon.open,
+.icon.rotate {
+  transform: rotate(90deg);
+}
+
+
+.payload-detail {
+  background-color: rgba(0, 0, 0, 0.3);
+  color: #ccc;
+  padding: 16px 24px;
+  margin-top: 6px;
+  font-style: italic;
+  font-family: monospace;
+  font-size: 0.95rem;
+  white-space: pre-wrap;
+  border-top: 1px solid #333;
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+.red-count {
+  color: #ff4c4c;
+  font-weight: bold;
+  text-shadow: 0 0 6px rgba(255, 0, 0, 0.7);
+}
