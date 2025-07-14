@@ -4,20 +4,28 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
+
+// First create the app
 const app = express();
+app.use(express.json());
+
+
+// Then wrap it with HTTP and attach socket.io
+const http = require('http').createServer(app);
+const io = require('socket.io')(http);
 
 // Ensure upload folder exists
 const uploadFolder = path.join(__dirname, 'uploads');
 fs.mkdirSync(uploadFolder, { recursive: true });
 
-// Set up multer storage
+// Multer config
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, uploadFolder),
   filename: (req, file, cb) => cb(null, `${Date.now()}-${file.originalname}`)
 });
 const upload = multer({ storage });
 
-// Set view engine
+// View engine setup
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '..', 'Public', 'views'));
 app.use(expressEjsLayouts);
@@ -30,8 +38,9 @@ app.use(express.static(path.join(__dirname, '..', 'Public')));
 app.get('/', (req, res) => res.render('index', { title: 'GoSpoof - Home' }));
 app.get('/attackers', (req, res) => res.render('attackers', { title: 'GoSpoof - Attackers', includeChartJS: true }));
 app.get('/payloads', (req, res) => res.render('payloads', { title: 'GoSpoof - Payloads' }));
+app.get('/live', (req, res) => res.render('live', { title: 'GoSpoof - Live' })); // Live page
 
-// Utils
+// Util: Get latest log
 function getLatestLogFilePath() {
   const files = fs.readdirSync(uploadFolder).filter(f => f.endsWith('.log'));
   if (!files.length) return null;
@@ -96,12 +105,53 @@ app.get('/api/payloads', (req, res) => {
   });
 });
 
-// Upload endpoint
+// Upload Endpoint
 app.post('/upload-log', upload.single('logFile'), (req, res) => {
   if (!req.file) return res.status(400).send('No file uploaded');
   console.log('Uploaded:', req.file.path);
-  res.redirect('/attackers');
+
+  fs.readFile(req.file.path, 'utf8', (err, data) => {
+    if (err) return res.status(500).send('Error reading uploaded log');
+
+    const lines = data.split('\n');
+    lines.forEach(line => {
+      const match = line.match(/\[HONEYPOT\].*? \| IP: ([\d.]+):\d+ \| Port: \d+ \| Data: "(.*?)"/);
+      if (match) {
+        const [_, ip, payloadRaw] = match;
+        const payload = payloadRaw.trim() || 'Probing Scan';
+
+        io.emit('new_attack', { ip, payload });
+      }
+    });
+
+    // Optional: go to live dashboard after upload
+    res.redirect('/live');
+  });
 });
 
-// Start
-app.listen(3000);
+
+// Socket.IO
+io.on('connection', (socket) => {
+  console.log('Client connected:', socket.id);
+  socket.emit('welcome', 'You are now connected to GoSpoof Live Feed');
+});
+
+app.get('/live', (req, res) => {
+  res.render('live', { title: 'GoSpoof - Live' });
+});
+const logPath = path.join(__dirname, 'uploads', 'live.log'); // Adjust filename if needed
+
+app.post('/live-capture', (req, res) => {
+  const { ip, payload } = req.body;
+
+  if (ip && payload) {
+    io.emit('new_attack', { ip, payload: payload.trim() || 'Probing Scan' });
+    res.status(200).send('ok');
+  } else {
+    res.status(400).send('missing ip or payload');
+  }
+});
+
+
+
+http.listen(3000);

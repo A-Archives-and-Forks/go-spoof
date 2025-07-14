@@ -7,10 +7,13 @@ handles connections.
 package main
 
 import (
+	"bytes"
 	"crypto/sha1"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net"
+	"net/http"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -160,6 +163,7 @@ func (s *server) handleConnection(conn net.Conn, config Config) {
 			originalPort,
 			requestData,
 		)
+		go sendToDashboard(strings.Split(remoteAddr, ":")[0], requestData)
 
 		fmt.Printf("Scanned at %s by %s\n", timestamp, remoteAddr)
 
@@ -311,4 +315,17 @@ func generateInclusiveRanges(excluded []int) []string {
 	}
 
 	return ranges
+}
+func sendToDashboard(ip string, payload string) {
+	data := map[string]string{
+		"ip":      ip,
+		"payload": payload,
+	}
+
+	jsonData, _ := json.Marshal(data)
+
+	_, err := http.Post("http://localhost:3000/live-capture", "application/json", bytes.NewBuffer(jsonData))
+	if err != nil {
+		log.Println("Error sending to dashboard:", err)
+	}
 }
