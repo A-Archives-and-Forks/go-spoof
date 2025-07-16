@@ -317,6 +317,7 @@ func generateInclusiveRanges(excluded []int) []string {
 	return ranges
 }
 func sendToDashboard(ip string, payload string) {
+	time.Sleep(5 * time.Second)
 	data := map[string]string{
 		"ip":      ip,
 		"payload": payload,

@@ -13,12 +13,14 @@
 </head>
 <body>
 
-  <div class="container">
-    <h1>Live Attacker Dashboard</h1>
-
+  <main class="dashboard-layout">
+  <h1>Live Attacker Dashboard</h1>
+  <div class="chart-row">
     <div class="chart-box"><canvas id="payloadChart"></canvas></div>
     <div class="chart-box"><canvas id="activityChart"></canvas></div>
-    <div class="chart-box"><div id="map"></div></div>
+  </div>
+  <div class="chart-box" style="height: 500px;"><div id="map"></div></div>
+</main>
 
   <script>
     const socket = io();
@@ -28,81 +30,79 @@
     const activityCounts = [];
     const markers = {};
 
-    const payloadChart = new Chart(document.getElementById('payloadChart').getContext('2d'), {
-      type: 'bar',
-      data: {
-        labels: [],
-        datasets: [{
-          label: 'Payload Frequency',
-          data: [],
-          backgroundColor: 'cyan'
-        }]
-      },
-      options: {
-        responsive: true,
-        scales: {
-          y: {
-            beginAtZero: true,
-            min: 0,
-            max: 100,
-            ticks: {
-              stepSize: 10
-            }
-          }
+const payloadChart = new Chart(document.getElementById('payloadChart').getContext('2d'), {
+  type: 'bar',
+  data: {
+    labels: [],
+    datasets: [{
+      label: 'Payload Frequency',
+      data: [],
+      backgroundColor: 'cyan'
+    }]
+  },
+  options: {
+    responsive: true,
+    animation: false,
+    scales: {
+      y: {
+        beginAtZero: true,
+        min: 1,
+        max: 1000,
+        ticks: {
+          stepSize: 10
         }
       }
-
-    });
-
-    const activityChart = new Chart(document.getElementById('activityChart').getContext('2d'), {
-      type: 'line',
-      data: {
-        labels: [],
-        datasets: [{
-          label: 'Attacks Over Time',
-          data: [],
-          borderColor: 'orange',
-          fill: false
-        }]
-      },
-      options: {
-        responsive: true,
-        scales: {
-          y: {
-            beginAtZero: true,
-            min: 0,
-            max: 100,
-            ticks: {
-              stepSize: 10
-            }
-          }
-        }
-      }
-
-    });
-
-    const map = L.map('map').setView([20, 0], 2);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: 'OSM contributors'
-    }).addTo(map);
-
-    function updateCharts(ip, payload) {
-      payloadData[payload] = (payloadData[payload] || 0) + 1;
-      payloadChart.data.labels = Object.keys(payloadData);
-      payloadChart.data.datasets[0].data = Object.values(payloadData);
-      payloadChart.update();
-
-      const now = new Date().toLocaleTimeString();
-      activityLabels.push(now);
-      activityCounts.push(1);
-      if (activityLabels.length > 15) {
-        activityLabels.shift();
-        activityCounts.shift();
-      }
-      activityChart.data.labels = activityLabels;
-      activityChart.data.datasets[0].data = activityCounts;
-      activityChart.update();
     }
+  }
+});
+
+ const activityChart = new Chart(document.getElementById('activityChart').getContext('2d'), {
+  type: 'line',
+  data: {
+    labels: Array.from({ length: 24 }, (_, i) => `${String(i).padStart(2, '0')}:00`),
+    datasets: [{
+      label: 'Attacks Over Time',
+      data: Array(24).fill(0),
+      borderColor: 'orange',
+      fill: false
+    }]
+  },
+  options: {
+    responsive: true,
+    animation: false,
+    scales: {
+      y: {
+        beginAtZero: true,
+        min: 1,
+        max: 10000,
+        ticks: {
+          stepSize: 1000
+        }
+      },
+      x: {
+        ticks: {
+          maxRotation: 0,
+          minRotation: 0
+        }
+      }
+    }
+  }
+});
+const map = L.map('map').setView([20, 0], 2);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: 'OSM contributors'
+}).addTo(map);
+
+function updateCharts(ip, payload) {
+  payloadData[payload] = (payloadData[payload] || 0) + 1;
+  payloadChart.data.labels = Object.keys(payloadData);
+  payloadChart.data.datasets[0].data = Object.values(payloadData);
+  payloadChart.update();
+  const hour = new Date().getHours();
+  activityChart.data.datasets[0].data[hour]++;
+  activityChart.update();
+}
+
 
     function addToMap(ip) {
       if (markers[ip]) return;

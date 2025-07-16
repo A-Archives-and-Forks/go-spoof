@@ -44,8 +44,12 @@ main {
 }
 
 h1 {
-  font-size: 3rem;
-  margin-bottom: 1rem;
+   font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid #00ffe0;
+  display: inline-block;
+  padding-bottom: 0.5rem;
 }
 
 .highlight {
@@ -252,11 +256,11 @@ canvas {
   height: 300px !important;
   background: black;
 }
-/* Shared styling for all chart/map containers */
+
 .chart-box {
-  width: 90%;
-  max-width: 700px;
-  height: 300px;
+width: 95%;
+  max-width: 1200px;
+  height: 500px;
   margin: 30px auto;
   border-radius: 10px;
   background: black;
@@ -266,15 +270,39 @@ canvas {
 .chart-box canvas {
   width: 100% !important;
   height: 100% !important;
-  border-radius: 10px;
-  background: transparent;
 }
 
-.chart-box #map {
+#map {
   width: 100%;
   height: 100%;
   border-radius: 10px;
+  background: #111;
+}
+.dashboard-layout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 1rem;
 }
 
 
+.chart-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2rem;
+  width: 100%;
+  max-width: 1300px;
+  margin-bottom: 2rem;
+}
 
+.chart-box:hover {
+  box-shadow: 0 0 12px rgba(0, 255, 224, 0.4);
+  transition: 0.3s ease;
+}
+@media (max-width: 768px) {
+  .chart-row {
+    flex-direction: column;
+    align-items: center;
+  }
+}

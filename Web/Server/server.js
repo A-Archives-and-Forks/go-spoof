@@ -154,4 +154,19 @@ app.post('/live-capture', (req, res) => {
 
 
 
-http.listen(3000);
+let PORT = process.env.PORT || 3000;
+
+http.listen(PORT)
+  .on('listening', () => {
+    console.log(`Web UI launched on http://localhost:${PORT}`);
+  })
+  .on('error', err => {
+    if (err.code === 'EADDRINUSE') {
+      PORT = PORT + 1;
+      console.warn('Port in use. Retrying on http://localhost:${PORT}...');
+      http.listen(PORT);
+    } else {
+      throw err;
+    }
+  });
+
