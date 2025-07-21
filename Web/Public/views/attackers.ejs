@@ -12,7 +12,7 @@
 
 <script>
   // Fetch attacker data
-  fetch('/api/attackers')
+  secureFetch('/api/attackers')
     .then(res => res.json())
     .then(data => {
       const table = document.getElementById('attackerTable');

@@ -34,7 +34,21 @@ func main() {
 
 	fmt.Println("Initializing npm and installing dependencies...")
 	runCmd("npm", []string{"init", "-y"}, serverDir)
-	runCmd("npm", []string{"install", "express", "multer", "ejs", "express-ejs-layouts"}, serverDir)
+
+	// Install all required dependencies
+	dependencies := []string{
+		"express",
+		"multer",
+		"ejs",
+		"express-ejs-layouts",
+		"bcrypt",
+		"better-sqlite3",
+		"express-rate-limit",
+		"express-session",
+		"validator",
+	}
+
+	runCmd("npm", append([]string{"install"}, dependencies...), serverDir)
 
 	fmt.Println("WebUI setup complete.")
 }

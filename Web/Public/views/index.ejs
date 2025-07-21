@@ -15,9 +15,16 @@
   document.getElementById("logForm").addEventListener("submit", async function (e) {
     e.preventDefault();
     const form = new FormData(this);
+    
+    // Add CSRF token to form data
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    form.append('_csrf', csrfToken);
 
     const res = await fetch("/upload-log", {
       method: "POST",
+      headers: {
+        'X-CSRF-Token': csrfToken
+      },
       body: form,
     });
 

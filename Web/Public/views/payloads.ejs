@@ -20,7 +20,7 @@
 </table>
 
 <script>
-fetch('/api/payloads')
+secureFetch('/api/payloads')
   .then(res => res.json())
   .then(data => {
     const exactMatchCheckbox = document.getElementById('exactMatchCheckbox');

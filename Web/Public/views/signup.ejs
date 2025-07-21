@@ -1,0 +1,92 @@
+<script src="/JS/login.js"></script>
+
+<div class="signup-container">
+  <div class="signup-card">
+    
+    <div class="signup-welcome">
+      <h2>Create Your GoSpoof Account</h2>
+    </div>
+    
+    <form id="signupForm" class="signup-form">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input 
+          type="text" 
+          id="username" 
+          name="username" 
+          required 
+          placeholder="Username"
+        />
+      </div>
+      
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input 
+          type="email" 
+          id="email" 
+          name="email" 
+          required 
+          placeholder="Email"
+        />
+      </div>
+      
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input 
+          type="password" 
+          id="password" 
+          name="password" 
+          required 
+          placeholder="Password"
+        />
+        <div class="password-requirements">
+          <div class="requirement" data-requirement="length">
+            <span class="requirement-icon">✕</span>
+            <span class="requirement-text">At least 12 characters</span>
+          </div>
+          <div class="requirement" data-requirement="uppercase">
+            <span class="requirement-icon">✕</span>
+            <span class="requirement-text">1 uppercase letter</span>
+          </div>
+          <div class="requirement" data-requirement="lowercase">
+            <span class="requirement-icon">✕</span>
+            <span class="requirement-text">1 lowercase letter</span>
+          </div>
+          <div class="requirement" data-requirement="number">
+            <span class="requirement-icon">✕</span>
+            <span class="requirement-text">1 number</span>
+          </div>
+          <div class="requirement" data-requirement="special">
+            <span class="requirement-icon">✕</span>
+            <span class="requirement-text">1 special character (!@#$%^&*()_+-=[]{}|;:,.<>?)</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="confirmPassword">Confirm Password</label>
+        <input 
+          type="password" 
+          id="confirmPassword" 
+          name="confirmPassword" 
+          required 
+          placeholder="Confirm Password"
+        />
+      </div>
+      
+      <button type="submit" class="signup-btn">
+        <span class="btn-text">Sign Up</span>
+        <span class="btn-loading" style="display: none;">
+          <div class="spinner"></div>
+          Creating user...
+        </span>
+      </button>
+    </form>
+    
+    <div id="signupStatus" class="status-message" style="display: none;"></div>
+
+    <div class="signup-footer">
+      <span>Already have an account? </span><a href="/login" class="login-link">Login here</a>
+    </div>
+  </div>
+</div> 
