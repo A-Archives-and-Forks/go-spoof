@@ -2,3 +2,4 @@ honeypot.log
 package-lock.json
 package.json
 node_modules/
+database.db

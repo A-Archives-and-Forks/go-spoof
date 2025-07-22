@@ -2,27 +2,117 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="csrf-token" content="<%= locals.csrfToken || '' %>" />
   <title><%= title %></title>
   <link rel="stylesheet" href="/CSS/styling.css" />
   <% if (locals.includeChartJS) { %>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <% } %>
 </head>
-<body>
-  <nav>
-    <ul>
-      <li><a href="/">Home</a></li>
-      <li><a href="/attackers">Attackers</a></li>
-      <li><a href="/payloads">Payloads</a></li>
-      <li><a href="/live">Live</a></li>
-    </ul>
-  </nav>
+<body class="<%= locals.hideNav ? 'auth-page' : '' %>">
+  <% if (!locals.hideNav) { %>
+    <nav>
+      <div class="nav-left">
+        <ul>
+          <li><a href="/">Home</a></li>
+          <li><a href="/attackers">Attackers</a></li>
+          <li><a href="/payloads">Payloads</a></li>
+          <li><a href="/live">Live</a></li>
+        </ul>
+      </div>
+      <div class="nav-right">
+        <ul id="auth-nav">
+          <li class="dropdown">
+            <button class="dropdown-toggle" id="user-menu-btn">
+              <span class="nav-username"><%= locals.user && user.username ? user.username.replace(/[<>]/g, '') : 'User' %></span>
+              <span class="chevron">&#9662;</span>
+            </button>
+            <div class="dropdown-menu" id="user-dropdown">
+              <a href="/profile">Profile</a>
+              <a href="#" id="logout-btn">Logout</a>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </nav>
+  <% } else { %>
+    <div class="auth-brand">GOSPOOF</div>
+  <% } %>
 
   <main>
     <%- body %>
   </main>
 
   <script>
+    // CSRF token management
+    function getCsrfToken() {
+      return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    }
+    
+    // Enhanced fetch function with CSRF protection
+    async function secureFetch(url, options = {}) {
+      const csrfToken = getCsrfToken();
+      const defaultOptions = {
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken
+        }
+      };
+      
+      return fetch(url, { ...defaultOptions, ...options });
+    }
+    
+    // Session monitoring for cross-tab synchronization
+    let sessionCheckInterval;
+    
+    // Check session status every 5 seconds for faster response
+    function startSessionMonitoring() {
+      sessionCheckInterval = setInterval(checkSessionStatus, 5000);
+    }
+    
+    // Check if user is still logged in
+    async function checkSessionStatus() {
+      try {
+        const response = await secureFetch('/api/check_session');
+        const data = await response.json();
+        
+        if (!data.loggedIn) {
+          // User is no longer logged in (account deleted or session expired)
+          clearInterval(sessionCheckInterval);
+          localStorage.removeItem('userLoggedIn');
+          localStorage.removeItem('username');
+          window.location.href = '/login';
+        } else {
+          // Update localStorage to sync across tabs
+          localStorage.setItem('userLoggedIn', 'true');
+          localStorage.setItem('username', data.user.username);
+        }
+      } catch (error) {
+        console.error('Session check failed:', error);
+      }
+    }
+    
+    // Listen for storage changes (other tabs logging in/out)
+    window.addEventListener('storage', function(e) {
+      if (e.key === 'userLoggedIn') {
+        if (e.newValue === null) {
+          // User logged out in another tab - immediate response
+          clearInterval(sessionCheckInterval);
+          window.location.href = '/login';
+        } else if (e.newValue === 'true') {
+          // User logged in in another tab
+          location.reload();
+        }
+      }
+    });
+    
+    // Initialize session monitoring if user is logged in
+    if (document.querySelector('.dropdown')) {
+      startSessionMonitoring();
+      // Set initial state
+      localStorage.setItem('userLoggedIn', 'true');
+    }
+
     // Fade-out nav transition
     document.querySelectorAll("a").forEach(link => {
       link.addEventListener("click", function (e) {
@@ -34,6 +124,57 @@
         }, 300);
       });
     });
+
+    // Dropdown functionality
+    function setupDropdown() {
+      const dropdownToggle = document.getElementById('user-menu-btn');
+      const dropdownMenu = document.getElementById('user-dropdown');
+      
+      if (dropdownToggle && dropdownMenu) {
+        dropdownToggle.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          dropdownMenu.classList.toggle('show');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+          if (!dropdownToggle.contains(e.target) && !dropdownMenu.contains(e.target)) {
+            dropdownMenu.classList.remove('show');
+          }
+        });
+      }
+    }
+
+    // Add logout functionality
+    function setupLogout() {
+      const logoutBtn = document.getElementById('logout-btn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', logout);
+      }
+    }
+
+    // Optimized logout function for instant response
+    async function logout() {
+      // Immediately clear session monitoring and localStorage for instant feedback
+      clearInterval(sessionCheckInterval);
+      localStorage.removeItem('userLoggedIn');
+      localStorage.removeItem('username');
+      
+      // Redirect immediately for instant visual feedback
+      window.location.href = '/login';
+      
+      // Send logout request in background (fire and forget)
+      try {
+        await secureFetch('/api/logout_user', { method: 'POST' });
+      } catch (error) {
+        // Logout request failed silently - user is already redirected
+      }
+    }
+
+    // Setup functionality when page loads
+    setupDropdown();
+    setupLogout();
   </script>
 </body>
 </html>

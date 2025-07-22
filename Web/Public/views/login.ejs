@@ -1,0 +1,51 @@
+<script src="/JS/login.js"></script>
+
+<div class="login-container">
+  <div class="login-card">
+    
+    <div class="login-welcome">
+      <h2>Welcome to GoSpoof</h2>
+      <p>Login or create a new account to continue</p>
+    </div>
+    
+    <form id="loginForm" class="login-form">
+      <div class="form-group">
+        <label for="usernameOrEmail">Username or Email</label>
+        <input 
+          type="text" 
+          id="usernameOrEmail" 
+          name="usernameOrEmail" 
+          required 
+          placeholder="Enter your username or email"
+        />
+      </div>
+      
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input 
+          type="password" 
+          id="password" 
+          name="password" 
+          required 
+          placeholder="Enter your password"
+        />
+      </div>
+      
+      <button type="submit" class="login-btn">
+        <span class="btn-text">Login</span>
+        <span class="btn-loading" style="display: none;">
+          <div class="spinner"></div>
+          Logging in...
+        </span>
+      </button>
+    </form>
+    
+    <div id="loginStatus" class="status-message" style="display: none;"></div>
+
+    <div class="login-footer">
+      <span>Don't have an account? </span><a href="/signup" class="create-user-link">Create a new user</a>
+      <br><br>
+      <a href="/forgot-password" class="create-user-link">Forgot your password?</a>
+    </div>
+  </div>
+</div>
