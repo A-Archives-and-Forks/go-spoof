@@ -249,9 +249,93 @@ nav ul li a:hover {
   letter-spacing: 0.5px;
 }
 
+/* Base button styles */
+.btn {
+  border: none;
+  border-radius: 8px;
+  padding: 1rem;
+  font-weight: bold;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+/* Specific button styles */
+.login-btn, .signup-btn {
+  background: linear-gradient(135deg, #00ffe0, #00ccb3);
+  color: #000;
+}
+.login-btn:hover, .signup-btn:hover {
+  background: linear-gradient(135deg, #00ccb3, #00ffe0);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 255, 224, 0.3);
+}
+.login-btn:disabled, .signup-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+.profile-btn {
+  background: linear-gradient(135deg, #00ffe0, #00d4c4);
+  color: #000;
+  font-size: 0.9rem;
+  padding: 0.75rem 1.5rem;
+}
+.profile-btn:hover {
+  background: linear-gradient(135deg, #00d4c4, #00ffe0);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 255, 224, 0.3);
+}
+.profile-btn:disabled {
+  background: #666;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+.danger-btn {
+  background: linear-gradient(135deg, #ff6f61, #e55a4f);
+  color: #fff;
+  font-size: 0.9rem;
+  padding: 0.75rem 1.5rem;
+}
+.danger-btn:hover {
+  background: linear-gradient(135deg, #e55a4f, #ff6f61);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(255, 107, 97, 0.3);
+}
+.danger-btn:disabled {
+  background: #666;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Card base class */
+.card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  width: 100%;
+}
+.login-card, .signup-card, .profile-card {
+  /* Inherit from .card */
+  max-width: 400px;
+  padding: 3rem;
+}
+.profile-card {
+  max-width: 600px;
+  padding: 2rem;
+}
+
+/* Consolidated input styles */
 .form-group input[type="text"],
 .form-group input[type="password"],
-.form-group input[type="email"] {
+.form-group input[type="email"],
+.modal-content input,
+.captcha-container input[type="number"] {
   background: rgba(0, 0, 0, 0.3);
   border: 2px solid rgba(0, 255, 224, 0.2);
   border-radius: 8px;
@@ -260,36 +344,20 @@ nav ul li a:hover {
   font-size: 1rem;
   transition: all 0.3s ease;
 }
-
 .form-group input[type="text"]:focus,
 .form-group input[type="password"]:focus,
-.form-group input[type="email"]:focus {
+.form-group input[type="email"]:focus,
+.modal-content input:focus,
+.captcha-container input[type="number"]:focus {
   outline: none;
   border-color: #00ffe0;
   box-shadow: 0 0 0 3px rgba(0, 255, 224, 0.1);
   background: rgba(0, 0, 0, 0.5);
 }
-
-.form-group input::placeholder {
+.form-group input::placeholder,
+.modal-content input::placeholder,
+.captcha-container input[type="number"]::placeholder {
   color: #888;
-}
-
-.login-btn {
-  background: linear-gradient(135deg, #00ffe0, #00ccb3);
-  border: none;
-  border-radius: 8px;
-  padding: 1rem;
-  color: #000;
-  font-weight: bold;
-  font-size: 1.1rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.login-btn:hover {
-  background: linear-gradient(135deg, #00ccb3, #00ffe0);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(0, 255, 224, 0.3);
 }
 
 .login-btn:disabled {
@@ -298,78 +366,10 @@ nav ul li a:hover {
   transform: none;
 }
 
-.signup-btn {
-  background: linear-gradient(135deg, #00ffe0, #00ccb3);
-  border: none;
-  border-radius: 8px;
-  padding: 1rem;
-  color: #000;
-  font-weight: bold;
-  font-size: 1.1rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.signup-btn:hover {
-  background: linear-gradient(135deg, #00ccb3, #00ffe0);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(0, 255, 224, 0.3);
-}
-
 .signup-btn:disabled {
   opacity: 0.7;
   cursor: not-allowed;
   transform: none;
-}
-
-.profile-btn {
-  background: linear-gradient(135deg, #00ffe0, #00d4c4);
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  color: #000;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 0.9rem;
-}
-
-.profile-btn:hover {
-  background: linear-gradient(135deg, #00d4c4, #00ffe0);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(0, 255, 224, 0.3);
-}
-
-.profile-btn:disabled {
-  background: #666;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
-
-.danger-btn {
-  background: linear-gradient(135deg, #ff6f61, #e55a4f);
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  color: #fff;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 0.9rem;
-}
-
-.danger-btn:hover {
-  background: linear-gradient(135deg, #e55a4f, #ff6f61);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(255, 107, 97, 0.3);
-}
-
-.danger-btn:disabled {
-  background: #666;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
 }
 
 .btn-loading {

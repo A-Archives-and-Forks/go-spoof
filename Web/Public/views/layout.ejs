@@ -24,7 +24,7 @@
         <ul id="auth-nav">
           <li class="dropdown">
             <button class="dropdown-toggle" id="user-menu-btn">
-              <span class="nav-username"><%= locals.user && user.username ? user.username.replace(/[<>]/g, '') : 'User' %></span>
+              <span class="nav-username"><%= locals.user && locals.user.username ? locals.user.username.replace(/[<>]/g, '') : 'User' %></span>
               <span class="chevron">&#9662;</span>
             </button>
             <div class="dropdown-menu" id="user-dropdown">

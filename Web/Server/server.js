@@ -10,16 +10,13 @@ const session = require('express-session');
 const rateLimit = require('express-rate-limit');
 const crypto = require('crypto');
 
-const upload = multer({ dest: 'uploads/' });
-const logDest = path.join(__dirname, '..', 'honeypot.log');
-
 // Store CAPTCHA answers temporarily (in production, use Redis or similar)
 const captchaStore = new Map();
 
 // Security configuration - random secrets for development
 // Note: In production, use environment variables for persistent secrets
 const SESSION_SECRET = crypto.randomBytes(32).toString('hex');
-const PORT = 3000;
+let PORT = 3000;
 
 // First create the app
 const app = express();
@@ -39,6 +36,7 @@ const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, uploadFolder),
   filename: (req, file, cb) => cb(null, `${Date.now()}-${file.originalname}`)
 });
+
 const upload = multer({ storage });
 
 // View engine setup
@@ -780,11 +778,6 @@ io.on('connection', (socket) => {
   socket.emit('welcome', 'You are now connected to GoSpoof Live Feed');
 });
 
-app.get('/live', (req, res) => {
-  res.render('live', { title: 'GoSpoof - Live' });
-});
-const logPath = path.join(__dirname, 'uploads', 'live.log'); // Adjust filename if needed
-
 app.post('/live-capture', (req, res) => {
   const { ip, payload } = req.body;
 
@@ -795,21 +788,6 @@ app.post('/live-capture', (req, res) => {
     res.status(400).send('missing ip or payload');
   }
 });
-
-
-http.listen(PORT)
-  .on('listening', () => {
-    console.log(`Web UI launched on http://localhost:${PORT}`);
-  })
-  .on('error', err => {
-    if (err.code === 'EADDRINUSE') {
-      PORT = PORT + 1;
-      console.warn('Port in use. Retrying on http://localhost:${PORT}...');
-      http.listen(PORT);
-    } else {
-      throw err;
-    }
-  });
 
 function getLatestLogFilePath() {
   const files = fs.readdirSync(uploadFolder).filter(f => f.endsWith('.log'));
@@ -862,6 +840,16 @@ app.use((err, req, res, next) => {
 });
 
 // start server
-app.listen(PORT, () => {
-  console.log("Server is listening")
-});
+http.listen(PORT)
+  .on('listening', () => {
+    console.log(`Web UI launched on http://localhost:${PORT}`);
+  })
+  .on('error', err => {
+    if (err.code === 'EADDRINUSE') {
+      PORT = PORT + 1;
+      console.warn('Port in use. Retrying on http://localhost:${PORT}...');
+      http.listen(PORT);
+    } else {
+      throw err;
+    }
+  });

@@ -20,8 +20,8 @@
 
     const formData = new FormData(form);
 
-     // Add CSRF token to form data
-     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    // Add CSRF token to form data
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
     form.append('_csrf', csrfToken);
 
     try {

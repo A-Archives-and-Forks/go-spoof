@@ -1,5 +1,5 @@
 <div class="profile-container">
-  <div class="profile-card">
+  <div class="profile-card card">
     <div class="profile-header">
       <h2>Profile Settings</h2>
       <p>Manage your account settings and preferences</p>
@@ -34,7 +34,7 @@
           <label for="confirm-password">Confirm New Password</label>
           <input type="password" id="confirm-password" name="confirmPassword" required>
         </div>
-        <button type="submit" class="profile-btn">Change Password</button>
+        <button type="submit" class="profile-btn btn">Change Password</button>
       </form>
       <div id="password-message" class="status-message"></div>
     </div>
@@ -43,7 +43,7 @@
     <div class="profile-section danger-zone">
       <h3>Delete Account</h3>
       <p class="warning-text">This action cannot be undone. All your data will be permanently deleted.</p>
-      <button id="delete-account-btn" class="danger-btn">Delete Account</button>
+      <button id="delete-account-btn" class="danger-btn btn">Delete Account</button>
     </div>
   </div>
 </div>
@@ -56,8 +56,8 @@
     <p>Please enter your password to confirm:</p>
     <input type="password" id="delete-password" placeholder="Enter your password">
     <div class="modal-buttons">
-      <button id="confirm-delete" class="danger-btn" disabled>Delete Account</button>
-      <button id="cancel-delete" class="cancel-btn">Cancel</button>
+      <button id="confirm-delete" class="danger-btn btn" disabled>Delete Account</button>
+      <button id="cancel-delete" class="cancel-btn btn">Cancel</button>
     </div>
   </div>
 </div>
