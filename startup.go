@@ -42,6 +42,11 @@ func main() {
 		"ejs",
 		"express-ejs-layouts",
 		"socket.io",
+		"bcrypt",
+		"better-sqlite3",
+		"express-rate-limit",
+		"express-session",
+		"validator",
 	}, serverDir)
 
 	fmt.Println("WebUI setup complete.")

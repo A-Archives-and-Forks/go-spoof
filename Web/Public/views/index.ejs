@@ -20,9 +20,16 @@
 
     const formData = new FormData(form);
 
+    // Add CSRF token to form data
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    form.append('_csrf', csrfToken);
+
     try {
       const res = await fetch("/upload-log", {
         method: "POST",
+        headers: {
+          'X-CSRF-Token': csrfToken
+        },
         body: formData,
       });
 
