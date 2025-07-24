@@ -16,20 +16,33 @@
 <div id="payloadContainer"></div>
 
 <script>
-let rawData = {};
+let rawData = [];
 
-secureFetch('/api/payloads')
+fetch('/api/payloads')
   .then(res => res.json())
   .then(data => {
     rawData = data;
-    renderPayloads(data);
+    const grouped = groupByIP(data);
+    renderPayloads(grouped);
   });
 
-function renderPayloads(data) {
+function groupByIP(entries) {
+  const grouped = {};
+  entries.forEach(({ ip, payload }) => {
+    if (!grouped[ip]) {
+      grouped[ip] = { total: 0, payloads: {} };
+    }
+    grouped[ip].total++;
+    grouped[ip].payloads[payload] = (grouped[ip].payloads[payload] || 0) + 1;
+  });
+  return grouped;
+}
+
+function renderPayloads(groupedData) {
   const container = document.getElementById('payloadContainer');
   container.innerHTML = '';
 
-  Object.entries(data).forEach(([ip, details]) => {
+  Object.entries(groupedData).forEach(([ip, details]) => {
     const wrapper = document.createElement('div');
     wrapper.style.marginBottom = '15px';
     wrapper.style.borderRadius = '5px';
@@ -53,22 +66,20 @@ function renderPayloads(data) {
     payloadBlock.style.padding = '10px 20px';
     payloadBlock.style.background = '#222';
 
-  Object.entries(details.payloads).forEach(([payload, count]) => {
-    const line = document.createElement('div');
-  
-    const payloadText = document.createTextNode(payload);
-    const countSpan = document.createElement('span');
-    countSpan.className = 'red-count';
-    countSpan.textContent = ` (x${count})`;
+    Object.entries(details.payloads).forEach(([payload, count]) => {
+      const line = document.createElement('div');
+      const payloadText = document.createTextNode(payload);
+      const countSpan = document.createElement('span');
+      countSpan.className = 'red-count';
+      countSpan.textContent = ` (x${count})`;
 
-    line.appendChild(payloadText);
-    line.appendChild(countSpan);
+      line.appendChild(payloadText);
+      line.appendChild(countSpan);
 
-    line.style.color = '#eee';
-    line.style.padding = '5px 0';
-    payloadBlock.appendChild(line);
-  });
-
+      line.style.color = '#eee';
+      line.style.padding = '5px 0';
+      payloadBlock.appendChild(line);
+    });
 
     let open = false;
     header.addEventListener('click', () => {
@@ -90,26 +101,14 @@ function applyFilter() {
   const query = document.getElementById('globalFilter').value.trim().toLowerCase();
   const exact = document.getElementById('exactMatchCheckbox').checked;
 
-  if (!query) return renderPayloads(rawData);
+  if (!query) return renderPayloads(groupByIP(rawData));
 
-  const filtered = {};
-
-  Object.entries(rawData).forEach(([ip, details]) => {
-    const ipMatch = exact ? ip === query : ip.includes(query);
-    const payloadMatches = Object.entries(details.payloads).filter(([p]) =>
-      exact ? p === query : p.toLowerCase().includes(query)
-    );
-
-    if (ipMatch || payloadMatches.length > 0) {
-      filtered[ip] = {
-        total: ipMatch
-          ? details.total
-          : payloadMatches.reduce((acc, [_, c]) => acc + c, 0),
-        payloads: ipMatch ? details.payloads : Object.fromEntries(payloadMatches)
-      };
-    }
+  const filteredRaw = rawData.filter(entry => {
+    const matchString = `${entry.ip} ${entry.payload} ${entry.date} ${entry.time}`.toLowerCase();
+    return exact ? matchString === query : matchString.includes(query);
   });
 
-  renderPayloads(filtered);
+  const grouped = groupByIP(filteredRaw);
+  renderPayloads(grouped);
 }
 </script>

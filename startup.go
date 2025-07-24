@@ -49,6 +49,10 @@ func main() {
 		"validator",
 	}, serverDir)
 
+	// 4. Set permissions for uploads dir
+	fmt.Println("Fixing upload directory permissions...")
+	runCmd("sudo", []string{"chmod", "-R", "755", serverDir + "/uploads"}, "")
+
 	fmt.Println("WebUI setup complete.")
 }
 

@@ -45,6 +45,10 @@ app.set('views', path.join(__dirname, '..', 'Public', 'views'));
 app.use(expressEjsLayouts);
 app.set('layout', 'layout');
 
+// Submission handeling 
+app.use(express.urlencoded({ extended: true }));
+
+
 // Static files
 app.use(express.static(path.join(__dirname, '..', 'Public')));
 
@@ -190,6 +194,30 @@ app.get('/payloads', requireAuth, (req, res) => {
   });
 });
 
+
+
+
+app.get('/api/payloads', requireAuth, apiLimiter, (req, res) => {
+  const logPath = getLatestLogFilePath(req);
+  if (!logPath || !fs.existsSync(logPath)) return res.json([]);
+
+  fs.readFile(logPath, 'utf8', (err, data) => {
+    if (err) return res.status(500).send('Could not read log file.');
+
+    const result = [];
+    data.split('\n').forEach(line => {
+      const match = line.match(/\[HONEYPOT\] (\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2}) \| IP: ([\d.]+):\d+ \| Port: \d+ \| Data: "(.*?)"/);
+      if (match) {
+        const [_, date, time, ip, payloadRaw] = match;
+        const payload = payloadRaw.trim() || 'Probing Scan';
+        result.push({ ip, date, time, payload });
+      }
+    });
+
+    res.json(result);
+  });
+});
+
 app.get('/live', requireAuth, (req, res) => {
   res.render('live', {
     title: 'GoSpoof Live'
@@ -205,7 +233,7 @@ app.get('/profile', requireAuth, (req, res) => {
 // api routes
 
 app.get('/api/attackers', requireAuth, apiLimiter, (req, res) => {
-  const logPath = getLatestLogFilePath();
+  const logPath = getLatestLogFilePath(req);
   if (!logPath) return res.json([]);
 
   fs.readFile(logPath, 'utf8', (err, data) => {
@@ -213,11 +241,12 @@ app.get('/api/attackers', requireAuth, apiLimiter, (req, res) => {
 
     const ipPayloadMap = {};
     data.split('\n').forEach(line => {
-      const match = line.match(/\[HONEYPOT\] .*? \| IP: ([\d.]+):\d+ \| Port: \d+ \| Data: "(.*?)"/);
+      const match = line.match(/\[HONEYPOT\].*?\| IP: ([\d.]+):\d+ \| Port: \d+ \| Data: "(.*?)"/);
       if (match) {
-        const [_, ip, payload] = match;
+        const [_, ip, payloadRaw] = match;
+        const payload = payloadRaw.trim() || 'Probing Scan';
         if (!ipPayloadMap[ip]) ipPayloadMap[ip] = new Set();
-        ipPayloadMap[ip].add(payload || 'Probing Scan');
+        ipPayloadMap[ip].add(payload);
       }
     });
 
@@ -230,37 +259,24 @@ app.get('/api/attackers', requireAuth, apiLimiter, (req, res) => {
   });
 });
 
-app.get('/api/payloads', requireAuth, apiLimiter, (req, res) => {
-  const logPath = getLatestLogFilePath();
-  if (!logPath) return res.json([]);
-
-  fs.readFile(logPath, 'utf8', (err, data) => {
-    if (err) return res.status(500).send('Could not read log file.');
-
-    const result = {};
-    data.split('\n').forEach(line => {
-      const match = line.match(/\[HONEYPOT\] (\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2}) \| IP: ([\d.]+):\d+ \| Port: \d+ \| Data: "(.*?)"/);
-      if (match) {
-        let [_, date, time, ip, payload] = match;
-        payload = payload.trim() || 'Probing Scan';
-
-        if (!result[ip]) {
-          result[ip] = { total: 0, payloads: {} };
-        }
-
-        result[ip].total++;
-        result[ip].payloads[payload] = (result[ip].payloads[payload] || 0) + 1;
-      }
-    });
-
-    res.json(result);
-  });
-});
-
 app.post('/upload-log', requireAuth, upload.single('logFile'), (req, res) => {
   if (!req.file) return res.status(400).send('No file uploaded');
   console.log('Uploaded:', req.file.path);
 
+  const originalname = req.file.originalname;
+  const storedname = req.file.filename;
+  const userId = req.session.userId;
+
+  // Store metadata about the file
+  try {
+    db.prepare(`INSERT INTO uploads (filename, originalname, storedname, uploaded_at, user_id)VALUES (?, ?, ?, datetime('now'), ?)`).run(storedname, originalname, storedname, userId);
+
+  } catch (err) {
+    console.error('Error saving to uploads table:', err);
+    return res.status(500).json({ error: 'Database error' });
+  }
+
+  // Read and broadcast log contents
   fs.readFile(req.file.path, 'utf8', (err, data) => {
     if (err) return res.status(500).send('Error reading uploaded log');
 
@@ -270,13 +286,11 @@ app.post('/upload-log', requireAuth, upload.single('logFile'), (req, res) => {
       if (match) {
         const [_, ip, payloadRaw] = match;
         const payload = payloadRaw.trim() || 'Probing Scan';
-
         io.emit('new_attack', { ip, payload });
       }
     });
 
-    // Optional: go to live dashboard after upload
-    res.redirect('/live');
+    res.redirect('/attackers');
   });
 });
 
@@ -506,6 +520,12 @@ app.get("/api/check_session", (req, res) => {
     res.status(200).send({ loggedIn: false });
   }
 });
+app.get('/uploads', requireAuth, (req, res) => {
+  const userId = req.session.userId;
+  const logs = db.prepare("SELECT filename FROM uploads WHERE user_id = ? ORDER BY uploaded_at DESC").all(userId);
+  res.render('uploads', { title: 'GoSpoof Uploads', logs });
+});
+
 
 app.post("/api/logout_user", (req, res) => {
   // Send immediate response for faster feedback
@@ -789,7 +809,24 @@ app.post('/live-capture', (req, res) => {
   }
 });
 
-function getLatestLogFilePath() {
+app.post('/select-log', requireAuth, (req, res) => {
+  const { filename } = req.body;
+
+  if (!filename) {
+    return res.status(400).json({ error: 'Missing filename' });
+  }
+  // You can now store selected log in session or query string
+  req.session.selectedLog = filename;
+  res.redirect('/attackers');
+});
+
+
+
+function getLatestLogFilePath(req = null) {
+  if (req?.session?.selectedLog) {
+    return path.join(uploadFolder, req.session.selectedLog);
+  }
+
   const files = fs.readdirSync(uploadFolder).filter(f => f.endsWith('.log'));
   if (!files.length) return null;
 
