@@ -38,10 +38,22 @@ Run either of the following commands to setup the iptables rule to redirect to p
 ```bash
 sudo iptables -t nat -A PREROUTING -p tcp -m tcp --dport 1:65535 -j REDIRECT --to-ports 4444
 ```
-Run the WebUI start up script
+Run the WebUI and Docker start up script
 
 ```bash
 go run startup.go
+```
+
+For Docker you can run
+
+```bash
+docker build -t gospoof .
+```
+Then 
+
+```bash
+docker run --rm -p 3000:3000 gospoof (any flags you wish as normal)
+
 ```
 
 After running, cd into the src directory.

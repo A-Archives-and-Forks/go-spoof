@@ -88,26 +88,36 @@ func runCmd(cmd string, args []string, dir string) {
 }
 
 func installDocker() {
+	fmt.Println("[*] Installing Docker CLI fallback...")
+
+	// Try to install docker-cli first (lightweight fallback)
 	runCmd("sudo", []string{"apt", "update"}, "")
+	runCmd("sudo", []string{"apt", "install", "-y", "docker-cli", "docker-buildx"}, "")
+
+	// Check if that was enough
+	if checkCommand("docker") {
+		fmt.Println("[+] docker-cli installed and working.")
+		return
+	}
+
+	fmt.Println("[!] docker-cli not sufficient. Installing full Docker engine...")
+
+	// Full Docker Engine for Debian/Kali
 	runCmd("sudo", []string{"apt", "install", "-y", "ca-certificates", "curl", "gnupg", "lsb-release"}, "")
 	runCmd("sudo", []string{"install", "-m", "0755", "-d", "/etc/apt/keyrings"}, "")
-
 	runCmd("bash", []string{
 		"-c",
 		`curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg`,
 	}, "")
-
 	runCmd("bash", []string{
 		"-c",
 		`echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null`,
 	}, "")
-
 	runCmd("sudo", []string{"apt", "update"}, "")
-	runCmd("sudo", []string{"apt", "install", "-y", "docker-ce", "docker-ce-cli", "containerd.io", "docker-buildx-plugin", "docker-compose-plugin"}, "")
+	runCmd("sudo", []string{"apt", "install", "-y", "docker-ce", "docker-ce-cli", "containerd.io", "docker-compose-plugin"}, "")
 
-	// Start and enable Docker
+	// Enable docker
 	runCmd("sudo", []string{"systemctl", "enable", "--now", "docker"}, "")
-
-	// Add user to Docker group
 	runCmd("sudo", []string{"usermod", "-aG", "docker", os.Getenv("USER")}, "")
+	fmt.Println("[+] Full Docker engine installed.")
 }
