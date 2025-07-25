@@ -1,4 +1,4 @@
-module main
+module github.com/blackhillsinfosec/GoSpoof
 
 go 1.22.2
 

@@ -31,6 +31,12 @@ func main() {
 	if _, err := os.Stat(serverDir); os.IsNotExist(err) {
 		log.Fatalf("Web/Server directory not found at %s", serverDir)
 	}
+	if !checkCommand("docker") {
+		fmt.Println("Docker not found. Installing...")
+		installDocker()
+	} else {
+		fmt.Println("Docker is installed.")
+	}
 
 	fmt.Println("Initializing npm and installing dependencies...")
 	runCmd("npm", []string{"init", "-y"}, serverDir)
@@ -76,4 +82,22 @@ func runCmd(cmd string, args []string, dir string) {
 	if err := c.Run(); err != nil {
 		log.Fatalf("Failed running %s: %v", cmd, err)
 	}
+}
+func installDocker() {
+	runCmd("sudo", []string{"apt", "update"}, "")
+	runCmd("sudo", []string{"apt", "install", "-y", "ca-certificates", "curl", "gnupg"}, "")
+	runCmd("sudo", []string{"install", "-m", "0755", "-d", "/etc/apt/keyrings"}, "")
+	runCmd("bash", []string{
+		"-c",
+		`curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg`,
+	}, "")
+	runCmd("bash", []string{
+		"-c",
+		`echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null`,
+	}, "")
+	runCmd("sudo", []string{"apt", "update"}, "")
+	runCmd("sudo", []string{"apt", "install", "-y", "docker-ce", "docker-ce-cli", "containerd.io", "docker-buildx-plugin", "docker-compose-plugin"}, "")
+
+	// Start and enable docker
+	runCmd("sudo", []string{"systemctl", "enable", "--now", "docker"}, "")
 }
