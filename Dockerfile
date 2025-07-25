@@ -1,20 +1,19 @@
-# Stage 1: Build the GoSpoof binary
+# -------- Stage 1: Build GoSpoof binary --------
 FROM golang:1.22 as builder
 
-# Set working dir and copy everything
 WORKDIR /app
 COPY . .
 
-# Build the binary from cmd/gospoof
+# Build the GoSpoof binary from cmd/gospoof
 RUN cd cmd/gospoof && go build -o /gospoof
 
-# Stage 2: Run with a minimal image
+#Stage 2: Minimal runtime image
 FROM debian:bullseye-slim
 
-# Copy the compiled binary
-COPY --from=builder /gospoof /usr/bin/gospoof
+# Prevent apt from asking questions (just in case)
+ENV DEBIAN_FRONTEND=noninteractive
 
-# Optional: expose a port if your server uses one
-# EXPOSE 8080
+# Copy binary from builder
+COPY --from=builder /gospoof /usr/bin/gospoof
 
 ENTRYPOINT ["gospoof"]

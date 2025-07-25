@@ -31,13 +31,16 @@ func main() {
 	if _, err := os.Stat(serverDir); os.IsNotExist(err) {
 		log.Fatalf("Web/Server directory not found at %s", serverDir)
 	}
+
+	// 4. Check for Docker
 	if !checkCommand("docker") {
-		fmt.Println("Docker not found. Installing...")
+		fmt.Println("Docker not found. Installing for Debian/Kali...")
 		installDocker()
 	} else {
 		fmt.Println("Docker is installed.")
 	}
 
+	// 5. Run npm setup
 	fmt.Println("Initializing npm and installing dependencies...")
 	runCmd("npm", []string{"init", "-y"}, serverDir)
 
@@ -55,7 +58,7 @@ func main() {
 		"validator",
 	}, serverDir)
 
-	// 4. Set permissions for uploads dir
+	// 6. Set permissions for uploads dir
 	fmt.Println("Fixing upload directory permissions...")
 	runCmd("sudo", []string{"chmod", "-R", "755", serverDir + "/uploads"}, "")
 
@@ -83,21 +86,28 @@ func runCmd(cmd string, args []string, dir string) {
 		log.Fatalf("Failed running %s: %v", cmd, err)
 	}
 }
+
 func installDocker() {
 	runCmd("sudo", []string{"apt", "update"}, "")
-	runCmd("sudo", []string{"apt", "install", "-y", "ca-certificates", "curl", "gnupg"}, "")
+	runCmd("sudo", []string{"apt", "install", "-y", "ca-certificates", "curl", "gnupg", "lsb-release"}, "")
 	runCmd("sudo", []string{"install", "-m", "0755", "-d", "/etc/apt/keyrings"}, "")
+
 	runCmd("bash", []string{
 		"-c",
-		`curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg`,
+		`curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg`,
 	}, "")
+
 	runCmd("bash", []string{
 		"-c",
-		`echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null`,
+		`echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null`,
 	}, "")
+
 	runCmd("sudo", []string{"apt", "update"}, "")
 	runCmd("sudo", []string{"apt", "install", "-y", "docker-ce", "docker-ce-cli", "containerd.io", "docker-buildx-plugin", "docker-compose-plugin"}, "")
 
-	// Start and enable docker
+	// Start and enable Docker
 	runCmd("sudo", []string{"systemctl", "enable", "--now", "docker"}, "")
+
+	// Add user to Docker group
+	runCmd("sudo", []string{"usermod", "-aG", "docker", os.Getenv("USER")}, "")
 }
