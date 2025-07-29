@@ -71,7 +71,7 @@ func config() Config {
 	//Command line flags (FLAG, DEFAULT, HELP)
 	configuration.IP = flag.String("i", addr, "ip : Bind to a particular IP address")
 	configuration.Port = flag.String("p", "4444", "port : bind to a particular PORT number")
-	configuration.ServiceSignaturePath = flag.String("s", "../tools/portspoof_signatures", "file_path : go-spoof service signature regex. file")
+	configuration.ServiceSignaturePath = flag.String("s", "../../tools/portspoof_signatures", "file_path : go-spoof service signature regex. file")
 	configuration.LoggingFilePath = flag.String("l", " ", "file_path : log port scanning alerts to a file")
 	configuration.Daemon = flag.String("D", " ", "run as daemon process")
 	configuration.SpoofPorts = flag.String("sP", "1-65535", "Provide a range of ports (1-10) or a list of ports 1,9,32, or a single port")

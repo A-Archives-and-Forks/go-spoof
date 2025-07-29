@@ -52,14 +52,14 @@ docker build -t gospoof .
 Then 
 
 ```bash
-docker run --rm -p 3000:3000 gospoof (any flags you wish as normal)
+docker run --rm --network host --privileged gospoof (any flags you wish as normal)
 
 ```
 
 After running, cd into the src directory.
 
 ```bash
-cd src
+cd cmd/gospoof
 ```
 
 The executable "goSpoof" should already exist in the directory - if not, rebuild it using the following: 
