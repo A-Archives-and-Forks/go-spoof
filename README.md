@@ -41,7 +41,7 @@ sudo iptables -t nat -A PREROUTING -p tcp -m tcp --dport 1:65535 -j REDIRECT --t
 Run the WebUI and Docker start up script
 
 ```bash
-go run startup.go
+go run DockerSetup.go
 ```
 
 For Docker you can run
@@ -56,10 +56,12 @@ docker run --rm --network host --privileged gospoof (any flags you wish as norma
 
 ```
 
-For NON-Docker, After running iptable rules, cd into the src directory.
+For NON-Docker, After running iptable rules, cd into cmd and build the website
 
 ```bash
-cd cmd/gospoof
+cd cmd
+go run webui.go
+cd gospoof
 ```
 
 The executable "goSpoof" should already exist in the directory - if not, rebuild it using the following: 
