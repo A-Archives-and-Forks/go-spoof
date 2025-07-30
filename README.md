@@ -56,7 +56,7 @@ docker run --rm --network host --privileged gospoof (any flags you wish as norma
 
 ```
 
-After running, cd into the src directory.
+For NON-Docker, After running iptable rules, cd into the src directory.
 
 ```bash
 cd cmd/gospoof
