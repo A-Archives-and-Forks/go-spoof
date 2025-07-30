@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	fmt.Println("Starting GoSpoof WebUI pt.2")
+	fmt.Println("Starting GoSpoof WebUI Setup")
 
 	// 1. Check for node
 	if !checkCommand("node") {
