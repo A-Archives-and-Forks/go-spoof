@@ -1,0 +1,50 @@
+<h1>Welcome to <span class="highlight">GoSpoof</span></h1>
+<p>This is the homepage. Navigate using the menu above or upload a honeypot log.</p>
+
+<div class="upload-section">
+  <h2>Upload <code>honeypot.log</code></h2>
+  <form id="logForm" enctype="multipart/form-data">
+    <input type="file" name="logFile" accept=".log" required />
+  </form>
+  <p id="uploadStatus"></p>
+</div>
+
+<script>
+  // File upload
+  const fileInput = document.querySelector('input[name="logFile"]');
+  const form = document.getElementById("logForm");
+  const status = document.getElementById("uploadStatus");
+
+  fileInput.addEventListener("change", async function () {
+    if (fileInput.files.length === 0) return;
+
+    const formData = new FormData(form);
+
+    // Add CSRF token to form data
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    form.append('_csrf', csrfToken);
+
+    try {
+      const res = await fetch("/upload-log", {
+        method: "POST",
+        headers: {
+          'X-CSRF-Token': csrfToken
+        },
+        body: formData,
+      });
+
+      if (res.redirected) {
+        window.location.href = res.url;
+      } else {
+        const message = await res.text();
+        status.textContent = message;
+      }
+
+    } catch (err) {
+      status.textContent = "Upload failed.";
+    }
+  });
+
+  // Disable default form submission
+  form.addEventListener("submit", (e) => e.preventDefault());
+</script>

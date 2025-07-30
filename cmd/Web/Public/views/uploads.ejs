@@ -1,0 +1,19 @@
+<h1>Uploaded Honeypot Logs</h1>
+
+<% if (logs && logs.length > 0) { %>
+  <ul style="margin-top: 20px; list-style: none; padding: 0;">
+    <% logs.forEach(log => { %>
+      <li style="margin-bottom: 12px; padding: 10px; background: #111; border-radius: 5px;">
+        <form action="/select-log" method="POST" style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="color: cyan;"><%= log.filename %></span>
+          <input type="hidden" name="filename" value="<%= log.filename %>">
+          <button type="submit" style="padding: 6px 12px; background: orange; color: #000; border: none; border-radius: 4px; cursor: pointer;">
+            View This Log
+          </button>
+        </form>
+      </li>
+    <% }) %>
+  </ul>
+<% } else { %>
+  <p style="margin-top: 30px;">No log files uploaded yet.</p>
+<% } %>

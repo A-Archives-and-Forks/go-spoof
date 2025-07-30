@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	fmt.Println("Starting GoSpoof WebUI Setup...")
+	fmt.Println("Starting GoSpoof WebUI Setup")
 
 	// 1. Check for node
 	if !checkCommand("node") {
@@ -32,9 +32,35 @@ func main() {
 		log.Fatalf("Web/Server directory not found at %s", serverDir)
 	}
 
+	// 5. Run npm setup
 	fmt.Println("Initializing npm and installing dependencies...")
 	runCmd("npm", []string{"init", "-y"}, serverDir)
-	runCmd("npm", []string{"install", "express", "multer", "ejs", "express-ejs-layouts"}, serverDir)
+
+	runCmd("npm", []string{
+		"install",
+		"express",
+		"multer",
+		"ejs",
+		"express-ejs-layouts",
+		"socket.io",
+		"bcrypt",
+		"better-sqlite3",
+		"express-rate-limit",
+		"express-session",
+		"validator",
+	}, serverDir)
+	// Create uploads directory if it doesn't exist
+	uploadsDir := serverDir + "/uploads"
+	if _, err := os.Stat(uploadsDir); os.IsNotExist(err) {
+		fmt.Println("Creating uploads directory...")
+		if err := os.MkdirAll(uploadsDir, 0755); err != nil {
+			log.Fatalf("Failed to create uploads directory: %v", err)
+		}
+	}
+
+	// 6. Set permissions for uploads dir
+	fmt.Println("Fixing upload directory permissions...")
+	runCmd("sudo", []string{"chmod", "-R", "755", serverDir + "/uploads"}, "")
 
 	fmt.Println("WebUI setup complete.")
 }

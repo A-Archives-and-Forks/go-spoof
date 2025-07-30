@@ -38,16 +38,30 @@ Run either of the following commands to setup the iptables rule to redirect to p
 ```bash
 sudo iptables -t nat -A PREROUTING -p tcp -m tcp --dport 1:65535 -j REDIRECT --to-ports 4444
 ```
-Run the WebUI start up script
+Run the WebUI and Docker start up script
 
 ```bash
-go run startup.go
+go run DockerSetup.go
 ```
 
-After running, cd into the src directory.
+For Docker you can run
 
 ```bash
-cd src
+docker build -t gospoof .
+```
+Then 
+
+```bash
+docker run --rm --network host --privileged gospoof (any flags you wish as normal)
+
+```
+
+For NON-Docker, After running iptable rules, cd into cmd and build the website
+
+```bash
+cd cmd
+go run webui.go
+cd gospoof
 ```
 
 The executable "goSpoof" should already exist in the directory - if not, rebuild it using the following: 

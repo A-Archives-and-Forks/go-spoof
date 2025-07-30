@@ -1,0 +1,114 @@
+<h1>Captured Payloads</h1>
+
+<div class="filter-bar" style="margin: 20px 0; display: flex; flex-wrap: wrap; gap: 10px;">
+  <input 
+    type="text"
+    id="globalFilter"
+    placeholder="Search IP, Date, Time, Payload..."
+    style="width: 100%; padding: 10px; margin-bottom: 20px; border-radius: 5px; border: 1px solid #ccc;"
+  > 
+  <label>
+    <input type="checkbox" id="exactMatchCheckbox" />
+    Exact Match
+  </label>
+</div>
+
+<div id="payloadContainer"></div>
+
+<script>
+let rawData = [];
+
+fetch('/api/payloads')
+  .then(res => res.json())
+  .then(data => {
+    rawData = data;
+    const grouped = groupByIP(data);
+    renderPayloads(grouped);
+  });
+
+function groupByIP(entries) {
+  const grouped = {};
+  entries.forEach(({ ip, payload }) => {
+    if (!grouped[ip]) {
+      grouped[ip] = { total: 0, payloads: {} };
+    }
+    grouped[ip].total++;
+    grouped[ip].payloads[payload] = (grouped[ip].payloads[payload] || 0) + 1;
+  });
+  return grouped;
+}
+
+function renderPayloads(groupedData) {
+  const container = document.getElementById('payloadContainer');
+  container.innerHTML = '';
+
+  Object.entries(groupedData).forEach(([ip, details]) => {
+    const wrapper = document.createElement('div');
+    wrapper.style.marginBottom = '15px';
+    wrapper.style.borderRadius = '5px';
+    wrapper.style.backgroundColor = '#111';
+
+    const header = document.createElement('div');
+    header.className = 'ip-header';
+    header.style.cursor = 'pointer';
+    header.style.padding = '10px 15px';
+    header.style.display = 'flex';
+    header.style.justifyContent = 'space-between';
+    header.style.alignItems = 'center';
+    header.innerHTML = `
+      <span class="icon" style="transform: rotate(270deg); transition: transform 0.3s;">◀</span>
+      <strong style="margin-left: 10px; color: cyan;">${ip}</strong>
+      <span style="float: right; color: orange;">(Total: ${details.total} payloads)</span>
+    `;
+
+    const payloadBlock = document.createElement('div');
+    payloadBlock.style.display = 'none';
+    payloadBlock.style.padding = '10px 20px';
+    payloadBlock.style.background = '#222';
+
+    Object.entries(details.payloads).forEach(([payload, count]) => {
+      const line = document.createElement('div');
+      const payloadText = document.createTextNode(payload);
+      const countSpan = document.createElement('span');
+      countSpan.className = 'red-count';
+      countSpan.textContent = ` (x${count})`;
+
+      line.appendChild(payloadText);
+      line.appendChild(countSpan);
+
+      line.style.color = '#eee';
+      line.style.padding = '5px 0';
+      payloadBlock.appendChild(line);
+    });
+
+    let open = false;
+    header.addEventListener('click', () => {
+      open = !open;
+      payloadBlock.style.display = open ? 'block' : 'none';
+      header.querySelector('.icon').style.transform = open ? 'rotate(90deg)' : 'rotate(270deg)';
+    });
+
+    wrapper.appendChild(header);
+    wrapper.appendChild(payloadBlock);
+    container.appendChild(wrapper);
+  });
+}
+
+document.getElementById('globalFilter').addEventListener('input', applyFilter);
+document.getElementById('exactMatchCheckbox').addEventListener('change', applyFilter);
+
+function applyFilter() {
+  const query = document.getElementById('globalFilter').value.trim().toLowerCase();
+  const exact = document.getElementById('exactMatchCheckbox').checked;
+
+  if (!query) return renderPayloads(groupByIP(rawData));
+
+  const filteredRaw = rawData.filter(entry => {
+    const matchString = `${entry.ip} ${entry.payload} ${entry.date} ${entry.time}`.toLowerCase();
+    return exact ? matchString === query : matchString.includes(query);
+  });
+
+  const grouped = groupByIP(filteredRaw);
+  renderPayloads(grouped);
+}
+</script>
