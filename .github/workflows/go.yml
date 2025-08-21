@@ -2,8 +2,8 @@ name: Compile and Test Go Program
 
 on:
   schedule:
-    - cron: "0 9 * * *"   
-  workflow_dispatch:        
+    - cron: "0 9 * * *"
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -18,19 +18,16 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version-file: src/go.mod
+          go-version-file: go.mod
           cache: true
 
       - name: Get deps
-        working-directory: ./src
         run: go mod download
 
       - name: Build
-        working-directory: ./src
-        run: go build -v -o goSpoof
+        run: go build -v -o goSpoof ./cmd/gospoof
 
       - name: Test
-        working-directory: ./src
         run: go test ./... -race -covermode=atomic -coverprofile=coverage.out
 
       - name: Upload artifacts
@@ -38,5 +35,5 @@ jobs:
         with:
           name: coverage-and-bin
           path: |
-            src/coverage.out
-            src/goSpoof
+            coverage.out
+            goSpoof
