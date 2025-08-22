@@ -18,16 +18,20 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version-file: go.mod
+          go-version-file: cmd/gospoof/go.mod   #mod is here
           cache: true
+          cache-dependency-path: cmd/gospoof/go.sum
 
       - name: Get deps
+        working-directory: ./cmd/gospoof
         run: go mod download
 
       - name: Build
-        run: go build -v -o goSpoof ./cmd/gospoof
+        working-directory: ./cmd/gospoof
+        run: go build -v -o goSpoof .
 
       - name: Test
+        working-directory: ./cmd/gospoof
         run: go test ./... -race -covermode=atomic -coverprofile=coverage.out
 
       - name: Upload artifacts
@@ -35,5 +39,5 @@ jobs:
         with:
           name: coverage-and-bin
           path: |
-            coverage.out
-            goSpoof
+            cmd/gospoof/coverage.out
+            cmd/gospoof/goSpoof
