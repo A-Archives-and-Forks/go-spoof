@@ -13,6 +13,8 @@ TO-DO
 package main
 
 import (
+	"io"
+    "gopkg.in/yaml.v3"
 	"bufio"
 	"flag"
 	"fmt"
@@ -90,6 +92,97 @@ func config() Config {
 	flag.Parse()
 	return configuration
 }
+type YAMLConfig struct {
+    IP                   string `yaml:"ip"`
+    Port                 string `yaml:"port"`
+    ServiceSignaturePath string `yaml:"serviceSignaturePath"`
+    LoggingFilePath      string `yaml:"loggingFilePath"`
+    Daemon               string `yaml:"daemon"`
+    SpoofPorts           string `yaml:"spoofPorts"`
+    StartTables          string `yaml:"startTables"`
+    TablesRange          string `yaml:"tablesRange"`
+    FlushTables          string `yaml:"flushTables"`
+    SleepOpt             string `yaml:"sleep"`
+    HoneypotMode         string `yaml:"honeypotMode"`
+    ThrottleLevel        string `yaml:"throttleLevel"`
+    RubberGlueMode       string `yaml:"rubberGlueMode"`
+    ExcludedPorts        string `yaml:"excludedPorts"`
+    BootFlag             *bool  `yaml:"boot"`    // pointer so "absent" vs "false" is distinguishable
+    RemoveBoot           *bool  `yaml:"rm"`
+    WebUI                *bool  `yaml:"webUI"`
+}
+
+func hasFlag(names ...string) bool {
+    for _, arg := range os.Args[1:] {
+        for _, n := range names {
+            if arg == n || strings.HasPrefix(arg, n+"=") {
+                return true
+            }
+            // also handle combined "-p4444"
+            if len(n) == 2 && strings.HasPrefix(arg, n) && len(arg) > 2 {
+                return true
+            }
+        }
+    }
+    return false
+}
+
+func applyYAML(cfg *Config, yc *YAMLConfig) {
+    if yc == nil {
+        return
+    }
+    if yc.IP != "" && !hasFlag("-i", "--i", "--ip") {
+        *cfg.IP = yc.IP
+    }
+    if yc.Port != "" && !hasFlag("-p", "--p", "--port") {
+        *cfg.Port = yc.Port
+    }
+    if yc.ServiceSignaturePath != "" && !hasFlag("-s", "--s") {
+        *cfg.ServiceSignaturePath = yc.ServiceSignaturePath
+    }
+    if yc.LoggingFilePath != "" && !hasFlag("-l", "--l") {
+        *cfg.LoggingFilePath = yc.LoggingFilePath
+    }
+    if yc.Daemon != "" && !hasFlag("-D", "--D") {
+        *cfg.Daemon = yc.Daemon
+    }
+    if yc.SpoofPorts != "" && !hasFlag("-sP", "--sP") {
+        *cfg.SpoofPorts = yc.SpoofPorts
+    }
+    if yc.StartTables != "" && !hasFlag("-sT", "--sT") {
+        *cfg.StartTables = yc.StartTables
+    }
+    if yc.TablesRange != "" && !hasFlag("-r", "--r") {
+        *cfg.TablesRange = yc.TablesRange
+    }
+    if yc.FlushTables != "" && !hasFlag("-fT", "--fT") {
+        *cfg.FlushTables = yc.FlushTables
+    }
+    if yc.SleepOpt != "" && !hasFlag("-w", "--w") {
+        *cfg.SleepOpt = yc.SleepOpt
+    }
+    if yc.HoneypotMode != "" && !hasFlag("-honey", "--honey") {
+        *cfg.HoneypotMode = yc.HoneypotMode
+    }
+    if yc.ThrottleLevel != "" && !hasFlag("-t", "--t") {
+        *cfg.ThrottleLevel = yc.ThrottleLevel
+    }
+    if yc.RubberGlueMode != "" && !hasFlag("-rg", "--rg") {
+        *cfg.RubberGlueMode = yc.RubberGlueMode
+    }
+    if yc.ExcludedPorts != "" && !hasFlag("-e", "--e") {
+        *cfg.ExcludedPorts = yc.ExcludedPorts
+    }
+    if yc.BootFlag != nil && !hasFlag("--boot", "-boot", "-boot=true", "-boot=false") {
+        *cfg.BootFlag = *yc.BootFlag
+    }
+    if yc.RemoveBoot != nil && !hasFlag("--rm", "-rm") {
+        *cfg.RemoveBoot = *yc.RemoveBoot
+    }
+    if yc.WebUI != nil && !hasFlag("--WebUI", "-WebUI") {
+        *cfg.WebUI = *yc.WebUI
+    }
+}
 
 func getIP() string {
 	addr, err := net.InterfaceAddrs()
@@ -112,6 +205,29 @@ func processArgs(config Config) Config {
 	if *config.WebUI {
 		go launchWebUI()
 	}
+	    // if -Y was provided, load YAML and merge (CLI overrides YAML)
+    if strings.TrimSpace(*config.Yaml) != "" && strings.TrimSpace(*config.Yaml) != "-" {
+        path := strings.TrimSpace(*config.Yaml)
+
+        f, err := os.Open(path)
+        if err != nil {
+            log.Fatalf("Failed to open YAML config %q: %v", path, err)
+        }
+        defer f.Close()
+
+        data, err := io.ReadAll(f)
+        if err != nil {
+            log.Fatalf("Failed to read YAML config %q: %v", path, err)
+        }
+
+        var yc YAMLConfig
+        if err := yaml.Unmarshal(data, &yc); err != nil {
+            log.Fatalf("Failed to parse YAML config %q: %v", path, err)
+        }
+
+        applyYAML(&config, &yc)
+    }
+
 	//rubber glue implimentation
 	if *config.RubberGlueMode == "Y" || *config.RubberGlueMode == "y" {
 		if *config.Port != "4444" || *config.SpoofPorts != "1-65535" || *config.HoneypotMode == "Y" || *config.ThrottleLevel != "0" {
