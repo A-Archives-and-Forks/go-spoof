@@ -59,7 +59,7 @@ type Config struct {
 	WebUI                 *bool
 }
 
-func config() Config {
+func config()Config{
 
 	var configuration Config
 
@@ -202,12 +202,15 @@ func getIP() string {
 }
 
 func processArgs(config Config) Config {
-	if *config.WebUI {
-		go launchWebUI()
-	}
-	    // if -Y was provided, load YAML and merge (CLI overrides YAML)
-    if strings.TrimSpace(*config.Yaml) != "" && strings.TrimSpace(*config.Yaml) != "-" {
-        path := strings.TrimSpace(*config.Yaml)
+    if y := strings.TrimSpace(*config.Yaml); y != "" && y != "-" {
+        path := y
+        if !filepath.IsAbs(path) {
+            if abs, err := filepath.Abs(path); err == nil {
+                path = abs
+            } else {
+                log.Fatalf("Failed to resolve YAML path %q: %v", y, err)
+            }
+        }
 
         f, err := os.Open(path)
         if err != nil {
@@ -226,7 +229,13 @@ func processArgs(config Config) Config {
         }
 
         applyYAML(&config, &yc)
+
+        *config.Yaml = path
     }
+
+    if *config.WebUI {
+        go launchWebUI()
+	}
 
 	//rubber glue implimentation
 	if *config.RubberGlueMode == "Y" || *config.RubberGlueMode == "y" {

@@ -11,9 +11,9 @@ import (
 func main() {
 	fmt.Println("Starting GoSpoof WebUI Setup")
 
-	root := findRepoRoot() 
-	serverDir := filepath.Join(root, "Web", "Server")
-	gospoofDir := filepath.Join(root, "cmd", "gospoof")
+	//hardcode paths
+	serverDir := "/home/kali/GoSpoof/Web/Server"
+	gospoofDir := "/home/kali/GoSpoof/cmd/gospoof"
 
 	if !checkCommand("node") {
 		fmt.Println("Node.js not found. Installing...")
@@ -21,7 +21,6 @@ func main() {
 	} else {
 		fmt.Println("Node.js is installed.")
 	}
-
 	if !checkCommand("npm") {
 		fmt.Println("npm not found. Please install it manually.")
 		return
@@ -30,10 +29,9 @@ func main() {
 	}
 
 	if _, err := os.Stat(serverDir); os.IsNotExist(err) {
-		log.Fatalf("Web/Server directory not found at %s (repo root: %s)", serverDir, root)
+		log.Fatalf("Web/Server directory not found at %s", serverDir)
 	}
 
-	// npm init + deps
 	fmt.Println("Initializing npm and installing dependencies...")
 	runCmd("npm", []string{"init", "-y"}, serverDir)
 	runCmd("npm", []string{
@@ -53,41 +51,28 @@ func main() {
 	uploadsDir := filepath.Join(serverDir, "uploads")
 	if _, err := os.Stat(uploadsDir); os.IsNotExist(err) {
 		fmt.Println("Creating uploads directory...")
-		if err := os.MkdirAll(uploadsDir, 0o755); err != nil {
+		if err := os.MkdirAll(uploadsDir, 0755); err != nil {
 			log.Fatalf("Failed to create uploads directory: %v", err)
 		}
 	}
 
 	fmt.Println("Fixing upload directory permissions...")
-	if err := os.Chmod(uploadsDir, 0o755); err != nil {
+	if err := os.Chmod(uploadsDir, 0755); err != nil {
 		runCmd("sudo", []string{"chmod", "-R", "755", uploadsDir}, "")
 	}
-
 	ensureGoDeps(gospoofDir)
-
 	fmt.Println("WebUI setup complete.")
 }
 
-func findRepoRoot() string {
-	cwd, _ := os.Getwd()
-	candidates := []string{
-		cwd,
-		filepath.Dir(cwd),
-		filepath.Dir(filepath.Dir(cwd)),
-	}
-
-	for _, c := range candidates {
-		if pathExists(filepath.Join(c, "Web", "Server")) &&
-			pathExists(filepath.Join(c, "cmd", "gospoof")) {
-			return c
-		}
-	}
-	return cwd
+func pathExists(p string) bool {
+	_, err := os.Stat(p)
+	return err == nil
 }
 
-func pathExists(p string) bool { _, err := os.Stat(p); return err == nil }
-
-func checkCommand(name string) bool { _, err := exec.LookPath(name); return err == nil }
+func checkCommand(name string) bool {
+	_, err := exec.LookPath(name)
+	return err == nil
+}
 
 func installNode() {
 	runCmd("sudo", []string{"apt", "update"}, "")
@@ -96,12 +81,6 @@ func installNode() {
 
 func ensureGoDeps(moduleDir string) {
 	goMod := filepath.Join(moduleDir, "go.mod")
-	if !pathExists(goMod) {
-		if pathExists("go.mod") {
-			moduleDir = "."
-			goMod = "go.mod"
-		}
-	}
 	if !pathExists(goMod) {
 		log.Printf("[warn] %s not found. Skipping Go dependency setup.", goMod)
 		return
@@ -129,8 +108,11 @@ func installGo() {
 
 func runCmd(cmd string, args []string, dir string) {
 	c := exec.Command(cmd, args...)
-	if dir != "" { c.Dir = dir }
+	if dir != "" {
+		c.Dir = dir
+	}
 	c.Stdout, c.Stderr = os.Stdout, os.Stderr
+	fmt.Printf("[exec] (dir=%s) %s %v\n", dir, cmd, args)
 	if err := c.Run(); err != nil {
 		log.Fatalf("Failed running %s %v (dir=%s): %v", cmd, args, dir, err)
 	}
@@ -138,7 +120,9 @@ func runCmd(cmd string, args []string, dir string) {
 
 func tryCmd(cmd string, args []string, dir string) error {
 	c := exec.Command(cmd, args...)
-	if dir != "" { c.Dir = dir }
+	if dir != "" {
+		c.Dir = dir
+	}
 	c.Stdout, c.Stderr = os.Stdout, os.Stderr
 	return c.Run()
 }
