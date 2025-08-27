@@ -12,7 +12,7 @@ func main() {
 	fmt.Println("Starting GoSpoof WebUI Setup")
 
 	//hardcode paths
-	serverDir := "/home/kali/GoSpoof/Web/Server"
+	serverDir := "/home/kali/GoSpoof/cmd"
 	gospoofDir := "/home/kali/GoSpoof/cmd/gospoof"
 
 	if !checkCommand("node") {

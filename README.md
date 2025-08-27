@@ -124,6 +124,35 @@ Usage of ./goSpoof:
       Removes all flags used on boot as well as the saved config file and deletes the gospoof.service. A complete fresh start
   --WebUI
       This launches the GoSpoof Command Center. To run the website without the entire GoSpoof tool running, simply cd .. then cd Web/Server then do node server.js. Open up a browser of your choice and go to http://localhost:3000
+
+
+
+      Example yaml configuration file
+
+# Minimal, sane defaults — uses your IP and turns on the WebUI
+ip: "192.xxx.xxx.xxx"
+port: "4444"
+
+serviceSignaturePath: "../tools/portspoof_signatures"
+
+# Behavior
+honeypotMode: "Y"        # "Y" or "N"
+spoofPorts: "1-65535"
+excludedPorts: "22,80,443"
+throttleLevel: "0"       # 0 disables throttling
+sleep: "0"
+rubberGlueMode: "N"      # leave "N" unless you want RG mode only
+
+# No iptables changes by default
+startTables: " "
+tablesRange: "1:65535"
+flushTables: " "
+
+# Extras
+webUI: true              # launches http://localhost:3000
+boot: false
+rm: false
+
 ```
 
 <div align="center">
