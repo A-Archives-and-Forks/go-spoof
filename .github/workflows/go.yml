@@ -2,34 +2,42 @@ name: Compile and Test Go Program
 
 on:
   schedule:
-    - cron:  '0 0 * * *'
+    - cron: "0 9 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        with:
-            TOKEN: ${{ secrets.PAT_TOKEN }}
-        uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Set up Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v5
         with:
-          go-version: '1.24.0'
+          go-version-file: cmd/gospoof/go.mod   #mod is here
+          cache: true
+          cache-dependency-path: cmd/gospoof/go.sum
 
-      - name: Compile Go program
-        run: go build -o goSpoof
-        working-directory: ./src
+      - name: Get deps
+        working-directory: ./cmd/gospoof
+        run: go mod download
 
-      - name: push update
-        run: |
-         git config --global user.email "jboyd@blackhillsinfosec.com"
-         git config --global user.name "Pipeline (AUTO)"
-         git add goSpoof
-         git commit -m "adding binary"
-         git push origin main
-        working-directory: ./src
-        
-             
+      - name: Build
+        working-directory: ./cmd/gospoof
+        run: go build -v -o goSpoof .
+
+      - name: Test
+        working-directory: ./cmd/gospoof
+        run: go test ./... -race -covermode=atomic -coverprofile=coverage.out
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-and-bin
+          path: |
+            cmd/gospoof/coverage.out
+            cmd/gospoof/goSpoof
