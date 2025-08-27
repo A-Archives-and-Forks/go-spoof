@@ -1,16 +1,23 @@
-name: Compile and Test Go Program
+name: Build & Test GoSpoof
 
 on:
-  schedule:
-    - cron: "0 9 * * *"
   workflow_dispatch:
+  push:
+    branches: [ main ]
+  schedule:
+    - cron: '0 9 * * *'
 
 permissions:
   contents: read
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: cmd/gospoof
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -18,26 +25,26 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version-file: cmd/gospoof/go.mod   #mod is here
+          go-version-file: cmd/gospoof/go.mod
           cache: true
           cache-dependency-path: cmd/gospoof/go.sum
 
-      - name: Get deps
-        working-directory: ./cmd/gospoof
-        run: go mod download
+      - name: Ensure deps (yaml + tidy)
+        run: |
+          go get gopkg.in/yaml.v3@v3.0.1
+          go mod tidy
+          go list -m all
 
       - name: Build
-        working-directory: ./cmd/gospoof
         run: go build -v -o goSpoof .
 
       - name: Test
-        working-directory: ./cmd/gospoof
         run: go test ./... -race -covermode=atomic -coverprofile=coverage.out
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-and-bin
+          name: goSpoof-${{ github.sha }}
           path: |
-            cmd/gospoof/coverage.out
-            cmd/gospoof/goSpoof
+            ${{ github.workspace }}/cmd/gospoof/goSpoof
+            ${{ github.workspace }}/cmd/gospoof/coverage.out
