@@ -138,73 +138,72 @@ func runRubberGlue(config Config) {
 }
 
 func (s *server) handleConnection(conn net.Conn, config Config) {
-	defer conn.Close()
-	originalPort := getOriginalPort(conn)
-	signature := config.PortSignatureMap[int(originalPort)]
-	seconds, _ := strconv.Atoi(*config.SleepOpt)
-	time.Sleep(time.Second * time.Duration(seconds))
-	_, err := conn.Write([]byte(signature))
+    defer conn.Close()
 
-	//honey action start
-	if *config.HoneypotMode == "Y" || *config.HoneypotMode == "y" {
-		remoteAddr := conn.RemoteAddr().String()
-		timestamp := time.Now().Format("2006-01-02 15:04:05")
-		_ = conn.SetReadDeadline(time.Now().Add(2 * time.Second))
-		buffer := make([]byte, 1024)
-		n, _ := conn.Read(buffer)
-		requestData := string(buffer[:n])
+    originalPort := getOriginalPort(conn)
+    signature := config.PortSignatureMap[int(originalPort)]
 
-		//format + write honeypot.log
-		logEntry := fmt.Sprintf(
-			"[HONEYPOT] %s | IP: %s | Port: %d | Data: %q\n",
-			timestamp,
-			remoteAddr,
-			originalPort,
-			requestData,
-		)
-		go sendToDashboard(strings.Split(remoteAddr, ":")[0], requestData)
+    seconds, _ := strconv.Atoi(*config.SleepOpt)
+    time.Sleep(time.Second * time.Duration(seconds))
+    _, err := conn.Write([]byte(signature))
 
-		fmt.Printf("Scanned at %s by %s\n", timestamp, remoteAddr)
+    if *config.HoneypotMode == "Y" || *config.HoneypotMode == "y" {
+        remoteAddr := conn.RemoteAddr().String()
+        timestamp := time.Now().Format("2006-01-02 15:04:05")
 
-		file, err := os.OpenFile("honeypot.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-		if err == nil {
-			defer file.Close()
-			_, _ = file.WriteString(logEntry)
-		} else {
-			log.Println("Failed to write honeypot log:", err)
-		}
-	}
+        _ = conn.SetReadDeadline(time.Now().Add(2 * time.Second))
+        buffer := make([]byte, 1024)
+        n, _ := conn.Read(buffer)
+        requestData := string(buffer[:n])
 
-	if err != nil && !strings.Contains(err.Error(), "connection reset by peer") {
-		log.Println("Error during response", err)
-	}
+        logEntry := fmt.Sprintf("[HONEYPOT] %s | IP: %s | Port: %d | Data: %q\n",
+            timestamp, remoteAddr, originalPort, requestData)
+        go sendToDashboard(strings.Split(remoteAddr, ":")[0], requestData)
 
-	if *config.LoggingFilePath != " " {
-		logFilePath := *config.LoggingFilePath
+        fmt.Printf("Scanned at %s by %s\n", timestamp, remoteAddr)
 
-		originalPortStr := strconv.Itoa(int(originalPort))
-		writeData := conn.RemoteAddr().String() + " -> " + originalPortStr + "\n"
+        file, err := os.OpenFile("honeypot.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+        if err == nil {
+            defer file.Close()
+            _, _ = file.WriteString(logEntry)
+        } else {
+            log.Println("Failed to write honeypot log:", err)
+        }
+    }
 
-		file, err := os.OpenFile(logFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-		if err != nil {
-			log.Println("Error on log write, closing write pointer. ", err)
-			if err := file.Close(); err != nil {
-				log.Fatal("Error on close, killing program. ", err)
-			}
-		}
+    if err != nil && !strings.Contains(err.Error(), "connection reset by peer") {
+        log.Println("Error during response", err)
+    }
 
-		_, err = file.Write([]byte(writeData))
-		if err != nil {
-			log.Println("Error writing to log!")
-			file.Close()
-		} else {
-			file.Close()
-		}
-	}
-	if strings.EqualFold(*config.HoneypotMode, "y") {
-		runHoneypotSession(conn, originalPort)
-		return //when user exits shell, defer will close conn
-	}
+    if *config.LoggingFilePath != " " {
+        logFilePath := *config.LoggingFilePath
+
+        originalPortStr := strconv.Itoa(int(originalPort))
+        writeData := conn.RemoteAddr().String() + " -> " + originalPortStr + "\n"
+
+        file, err := os.OpenFile(logFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+        if err != nil {
+            log.Println("Error on log write, closing write pointer. ", err)
+            if err := file.Close(); err != nil {
+                log.Fatal("Error on close, killing program. ", err)
+            }
+        }
+
+        _, err = file.Write([]byte(writeData))
+        if err != nil {
+            log.Println("Error writing to log!")
+            file.Close()
+        } else {
+            file.Close()
+        }
+    }
+
+    if strings.EqualFold(*config.HoneypotMode, "y") {
+        if originalPort == 22 { 
+            runHoneypotSession(conn, originalPort)
+        }
+        return
+    }
 }
 
 //prompt shows current path
@@ -434,7 +433,7 @@ func runHoneypotSession(conn net.Conn, originalPort uint16) {
 		}
 		cmdline := strings.TrimSpace(line)
 
-		// keylog every command line
+		//keylog every command line
 		appendKeylog(remoteIP, originalPort, sessionID, "cmd: "+cmdline)
 
 		if cmdline == "" {
