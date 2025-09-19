@@ -238,14 +238,15 @@ func processArgs(config Config) Config {
 	}
 
 	//rubber glue implimentation
-	if *config.RubberGlueMode == "Y" || *config.RubberGlueMode == "y" {
-		if *config.Port != "4444" || *config.SpoofPorts != "1-65535" || *config.HoneypotMode == "Y" || *config.ThrottleLevel != "0" {
-			log.Fatal("Rubber Glue mode (-rg) must be used alone. Do not include other flags like -p, -sP, -honey, or -t.")
+	if rg := strings.ToLower(strings.TrimSpace(*config.RubberGlueMode)); rg == "y" || rg == "exec" {
+		if *config.Port != "4444" || *config.SpoofPorts != "1-65535" ||
+		strings.EqualFold(*config.HoneypotMode, "Y") || *config.ThrottleLevel != "0" {
+			log.Fatal("Rubber Glue (-rg) must be used alone. Do not include other flags like -p, -sP, -honey, or -t.")
 		}
-		log.Println("Rubber Glue mode active. Listening and capturing...")
+		log.Printf("Rubber Glue mode (%s) active on :4444...", rg)
 		return config
-		//whole block forces exclusivity
-	}
+}
+
 
 	minPort := 1
 	maxPort := 65535
@@ -270,7 +271,7 @@ func processArgs(config Config) Config {
 		if err != nil {
 			log.Fatalf("[-] Failed to get executable path: %v", err)
 		}
-		// Convert signature file path (-s) to absolute if it's relative
+		//Convert signature file path (-s) to absolute if it's relative
 		for i, arg := range args {
 			if i > 0 && args[i-1] == "-s" && !filepath.IsAbs(arg) {
 				absSigPath, err := filepath.Abs(arg)
@@ -326,12 +327,8 @@ func processArgs(config Config) Config {
 		unitPath := "/etc/systemd/system/" + serviceName
 
 		log.Println("[*] Removing GoSpoof systemd boot persistence...")
-
-		// stoppes and disables service
 		exec.Command("systemctl", "stop", serviceName).Run()
 		exec.Command("systemctl", "disable", serviceName).Run()
-
-		// delete the service file
 		if _, err := os.Stat(unitPath); err == nil {
 			err := os.Remove(unitPath)
 			if err != nil {
@@ -342,8 +339,6 @@ func processArgs(config Config) Config {
 		} else {
 			log.Println("[*] Service file not found. Nothing to delete.")
 		}
-
-		// sys clean up
 		exec.Command("systemctl", "daemon-reexec").Run()
 		exec.Command("systemctl", "daemon-reload").Run()
 
@@ -357,8 +352,6 @@ func processArgs(config Config) Config {
 			log.Fatal("Invalid throttle level for -t. Use -t1 to -t5.")
 		}
 		delayMinutes := 5 * (1 << (level - 1))
-
-		// convert it to a string that looks like a number of minutes, stored in config.SleepOpt
 		*config.SleepOpt = strconv.Itoa(delayMinutes * 60)
 	}
 
@@ -518,8 +511,8 @@ func processArgs(config Config) Config {
 			wg.Add(1)
 
 			if i == 0 {
-				startIndex = 1 + i   // 1
-				endIndex = chunkSize // 10000
+				startIndex = 1 + i 
+				endIndex = chunkSize
 			} else {
 				startIndex = i * chunkSize        //X0000
 				endIndex = startIndex + chunkSize //(X + C)0000
@@ -555,7 +548,6 @@ func processArgs(config Config) Config {
 }
 
 func launchWebUI() {
-	// Launch server
 	cmd := exec.Command("node", "../Web/Server/server.js")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -577,7 +569,7 @@ func launchWebUI() {
 	log.Println("🌐 Web UI launched on", url)
 }
 
-// Processes the signature file and returns a map of port:signature
+//processes the signature file and returns a map of port:signature
 func processSignatureFile(config Config, minPort int, maxPort int, intPortArray []int, isList bool) map[int]string {
 
 	var signatureLines []string
