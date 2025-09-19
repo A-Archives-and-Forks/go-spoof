@@ -1,20 +1,20 @@
-# --- Build stage ---
-FROM golang:1.22 AS builder
+olang:1.22 AS builder
 ENV GOTOOLCHAIN=auto
 WORKDIR /app
 
 COPY cmd/gospoof/go.mod ./cmd/gospoof/
-
-# Download deps for the submodule; will create go.sum if missing
 WORKDIR /app/cmd/gospoof
 RUN go mod download
 
 WORKDIR /app
 COPY . .
+
 WORKDIR /app/cmd/gospoof
+RUN go mod tidy
+
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /gospoof
 
-
+# --- Runtime stage ---
 FROM debian:bullseye-slim
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -27,8 +27,6 @@ RUN apt-get update && \
 COPY --from=builder /gospoof /usr/bin/gospoof
 COPY cmd/tools /tools
 COPY cmd/Web /Web
-
-# Install Web deps only if package.json exists
 RUN [ -f /Web/package.json ] && cd /Web && npm ci --omit=dev || true
 
 ENTRYPOINT ["/usr/bin/gospoof"]
