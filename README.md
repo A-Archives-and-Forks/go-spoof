@@ -38,18 +38,17 @@ Run either of the following commands to setup the iptables rule to redirect to p
 ```bash
 sudo iptables -t nat -A PREROUTING -p tcp -m tcp --dport 1:65535 -j REDIRECT --to-ports 4444
 ```
-Run the Startup and Docker start up script
-
+For Docker run the set up script
 ```bash
 go run DockerSetup.go
 ```
 
-For Docker you can run
+Then
 
 ```bash
 docker build -t gospoof .
 ```
-Then 
+Now you can run
 
 ```bash
 docker run --rm --network host --privileged gospoof (any flags you wish as normal)
@@ -59,8 +58,8 @@ docker run --rm --network host --privileged gospoof (any flags you wish as norma
 For NON-Docker, After running iptable rules, cd into cmd and build the website
 
 ```bash
-cd cmd
-go run startup.go
+cd GoSpoof/cmd
+go run setup.go
 cd gospoof
 ```
 
